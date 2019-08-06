@@ -1,0 +1,17 @@
+{# Setup #}
+{% extends "_base.jinja" %}
+{% block title %}Home{% endblock %}
+
+{# Body content #}
+{% block body %}
+    <h1>Moopity Moop</h1>
+    <h3>Config from database:</h3>
+        <p>MinecraftServers: {{ res[0] }}</p>
+        <p>GuildPrefixes: {{ res[1] }}</p>
+        <p>Request time taken: {{ (time() - start)*1000 }}ms</p>
+
+    {% for i in range(1000) %}
+        <br>
+    {% endfor %}
+    ok
+{% endblock body %}

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8"/>
+        <link rel="stylesheet" type="text/css" href="/static/thefbi.css?q={{randint(1,9999)}}"/>
+        <link rel="icon" href="/static/moopitymoop.png"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+        <title>{% block title %}This page existn't{% endblock title %} • Moopity Moop</title>
+
+        {# All the meta tags required for the website embed in Discord #}
+        <meta property="og:type" content="website">
+        <meta property="og:site_name" content="Made by @Chocolatejade42#2793">
+        <meta property="og:title" content="Moopity Moop • A Minecraft Discord bot">
+        <meta property="og:description" content="{% block embed_description %}Featuring commands for Minecraft such as server pinging, player counts, MOTD checks and more! Moopity Moop can also fetch stats from popular Minecraft servers such as Hypixel and The Hive!{% endblock embed_description %}">
+        <meta property="og:image" content="/static/moopitymoop.png">
+        <meta name="theme-color" content="#3498db">
+    </head>
+    <body>
+        {# Gotta have a navbar! #}
+    	<div class="navbar">
+			<img src="/static/moopitymoop.png" href="/" alt="icon">
+			<a href="/">Home</a>
+			<a href="/info">Info</a>
+			<a href="/stats">Stats</a>
+			<a href="/cmds">Commands</a>
+			<a href="/links">Links</a>
+
+			<a href="/login" id="star">Login</a>
+			<a href="/invite" id="star">Invite</a>
+		</div><br>
+        
+        {% block body %}
+            {# Code for 404 because it is otherwise redefined #}
+            
+            <style>
+                .center-div p {
+                    float: left;
+                } .center-div p img {
+                    width: 130px; height: 130px
+                }
+            </style>
+
+            <div class="center-div">
+                <p><img src="/static/moopitymoop.png" alt="Moopity Moop icon"></p>
+                <h2>404 This page existn't</h2>
+                <h3>You find yourself in a strange place, there doesn't seem to be anything here 🤔 Click <a href="/">here</a> to return home</h3>
+            </div>
+        {% endblock body %}
+    </body>
+</html>

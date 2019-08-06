@@ -1,0 +1,66 @@
+/* Default styling */
+body {
+    background-color: #75b9e7;
+} * {
+    color:white;
+    font-family: "Consolas";
+} a {
+    color: #75b9e7;
+}
+
+/* Navbar styling */
+.navbar {
+    /* Background bar */
+    background-color: #3498db;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+}
+.navbar img {
+    /* Moopity Moop icon */
+    float: left;
+    width: 46px;
+    height: 46px;
+}
+.navbar a {
+    /* Normal buttons */
+    float: left;
+    display: block;
+    color: #EAE0C7;
+    font-weight: 500;
+    font-family: "Consolas";
+    padding: 14px 16px;
+    text-decoration: none;
+}
+.navbar a:hover {
+    color: goldenrod;
+    font-weight: 1000;
+}
+.navbar a#star {
+    /* Buttons on the right */
+    color: goldenrod;
+    font-weight: 1000;
+    float: right;
+}
+.navbar a#star:hover {
+    color: #EAE0C7;
+}
+
+/* Some pages have a center div */
+.center-div {
+    position: absolute;
+    margin: auto; overflow: auto;
+    top: 0; right: 0;
+    bottom: 0; left: 0;
+    width: 525px; height: 170px; /* This can be over-ridden */
+    background-color: #3498db;
+    border-radius: 4px;
+    text-align: center;
+    color: #EAE0C7;
+}
+
+/* Custom scrollbar (condensed) */
+::-webkit-scrollbar {width: 10px}
+::-webkit-scrollbar-track {background: #EAE0C7}
+::-webkit-scrollbar-thumb {background: #3498db}
+::-webkit-scrollbar-thumb:hover {background: #555}
