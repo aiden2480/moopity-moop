@@ -1,0 +1,45 @@
+/* Navbar styling */
+.navbar {
+    /* Background bar */
+    background-color: #2F3136;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+}
+.navbar img#moopicon {
+    /* Moopity Moop icon */
+    float: left;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+}
+.navbar img#usericon {
+    /* The user's icon displayed when logged in */
+    float: right;
+    border-radius: 50%;
+    height: 46px;
+    width: 46px;
+}
+.navbar a.link {
+    /* Normal buttons */
+    float: left;
+    display: block;
+    color: #00A2E8;
+    font-weight: 500;
+    font-family: "Consolas";
+    padding: 14px 16px;
+    text-decoration: none;
+}
+.navbar a.link:hover {
+    color: goldenrod;
+    font-weight: 1000;
+}
+.navbar a.link.star {
+    /* Buttons on the right */
+    color: goldenrod;
+    font-weight: 1000;
+    float: right;
+}
+.navbar a.link.star:hover {
+    color: #EAE0C7;
+}

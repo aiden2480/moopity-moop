@@ -1,92 +1,228 @@
-"""Handles all extra events for the bot that
-I don't want clogging up the main file"""
-from aiohttp import ClientSession
 from datetime import datetime as dt
 
-from discord import Webhook, AsyncWebhookAdapter, Guild, Member, Embed
-from discord.ext.commands import Bot, Cog
-from discord.ext.commands import command, is_owner
+from discord import AsyncWebhookAdapter, Embed, Guild, Member, Role, Webhook
+from discord.ext import commands
 
 
-class Events(Cog):
-    def __init__(self, bot: Bot):
-        self.bot = bot
-        self.guild_webhook_url = bot.env("GUILD_WEBHOOK_URL")
-        self.commands_webhook_url = bot.env("COMMANDS_WEBHOOK_URL")
+class Events(commands.Cog):
+    """
+    Handles all extra events for the bot that
+    I don't want clogging up the main file. I've
+    got a whole bunch of events, some called multiple times:
+        - Webhook logging of commands, guild updates
+        - Minecraft role checks
+        - Checking for blacklisted guilds
+        - Deleting old user's data
+        - Posting data to Google Analytics
     
-    # Events
-    @Cog.listener()
-    async def on_guild_join(self, guild):
+    The cheat sheet for Google Analytics is as follows:
+        v: version            t: type (of hit)
+        aip: anonymise IP     tid: tracking ID
+        an: application name  dp: document path
+        dh: document host     uid: user ID
+        cid: client ID        cs: campaign source
+        cm: campaign medium   cd: screen name
+        dt: document title    cc: campaign content
+    """
+
+    def __init__(self, bot: commands.Bot):
+        self.bot = bot
+        self.db = bot.db
+        self.sess = bot.session
+        self.guild_webhook_url = bot.env["GUILD_WEBHOOK_URL"]
+        self.commands_webhook_url = bot.env["COMMANDS_WEBHOOK_URL"]
+        self.gurl = "https://www.google-analytics.com/collect"
+        self.gparams = dict(
+            v="1", t="pageview", aip="1",
+            tid=self.bot.env["GOOGLE_TRACKING_ID"],
+            an=str(bot.user), dh=bot.website_url,
+        )
+
+    # Webhook events
+    @commands.Cog.listener(name="on_guild_join")
+    async def guild_join_webhook(self, guild: Guild):
         """Notify me when the bot joins a guild"""
-        print(f"Joined a new guild: {guild.name}")
-        
-        async with ClientSession(loop= self.bot.loop) as http:
-            webhook = Webhook.from_url(self.guild_webhook_url, adapter= AsyncWebhookAdapter(http))
-            e = Embed(colour= 0x6ce479, timestamp= dt.utcnow(), description= f"Joined **{guild.name}**")
-            
-            e.set_thumbnail(url= guild.icon_url)
-            e.add_field(name= "Member count", value= guild.member_count)
-            e.add_field(name= "New total guilds", value= len(self.bot.guilds))
-            e.set_author(name= "Guild Join", icon_url= "https://bit.ly/32iG9BC")
-            e.set_footer(text= f"Guild owner: {guild.owner}", icon_url= guild.owner.avatar_url)
+        self.bot.guildlogger.info(f"Joined a guild: {guild.name}")
+        webhook = Webhook.from_url(self.guild_webhook_url, adapter=AsyncWebhookAdapter(self.sess))
+        e = Embed(
+            colour=0x6CE479,
+            timestamp=dt.utcnow(),
+            description=f"Joined **{guild.name}**",
+        )
 
-            await webhook.send(embed= e, username= self.bot.user.name, avatar_url= self.bot.user.avatar_url)
+        e.set_thumbnail(url=guild.icon_url)
+        e.add_field(name="Member count", value=guild.member_count)
+        e.add_field(name="New total guilds", value=len(self.bot.guilds))
+        e.set_author(name="Guild Join", icon_url="https://bit.ly/32iG9BC")
+        e.set_footer(text=f"Guild owner: {guild.owner}", icon_url=guild.owner.avatar_url)
 
-    @Cog.listener()
-    async def on_guild_remove(self, guild):
+        await webhook.send(
+            embed=e,
+            username=self.bot.user.name,
+            avatar_url=self.bot.user.avatar_url,
+        )
+
+    @commands.Cog.listener(name="on_guild_remove")
+    async def guild_leave_webhook(self, guild: Guild):
         """Notify me when the bot leaves a guild"""
-        print(f"Left a guild: {guild.name}")
-        
-        async with ClientSession(loop= self.bot.loop) as http:
-            webhook = Webhook.from_url(self.guild_webhook_url, adapter= AsyncWebhookAdapter(http))
-            e = Embed(colour= 0xe84c3d, timestamp= dt.utcnow(), description= f"Left **{guild.name}**")
-            
-            e.set_thumbnail(url= guild.icon_url)
-            e.add_field(name= "Member count", value= guild.member_count)
-            e.add_field(name= "New total guilds", value= len(self.bot.guilds))
-            e.set_author(name= "Guild Leave", icon_url= "https://bit.ly/2NQSABA")
-            e.set_footer(text= f"Guild owner: {guild.owner}", icon_url= guild.owner.avatar_url)
+        self.bot.guildlogger.info(f"Left a guild: {guild.name}")
+        webhook = Webhook.from_url(self.guild_webhook_url, adapter=AsyncWebhookAdapter(self.sess))
+        e = Embed(
+            colour=0xE84C3D, timestamp=dt.utcnow(),
+            description=f"Left **{guild.name}**"
+        )
 
-            await webhook.send(embed= e, username= self.bot.user.name, avatar_url= self.bot.user.avatar_url)
+        e.set_thumbnail(url=guild.icon_url)
+        e.add_field(name="Member count", value=guild.member_count)
+        e.add_field(name="New total guilds", value=len(self.bot.guilds))
+        e.set_author(name="Guild Leave", icon_url="https://bit.ly/2NQSABA")
+        e.set_footer(text=f"Guild owner: {guild.owner}", icon_url=guild.owner.avatar_url)
 
-    @Cog.listener()
-    async def on_command(self, ctx):
-        print(f"{ctx.author}: {ctx.message.content}")
+        await webhook.send(
+            embed=e, username=self.bot.user.name, avatar_url=self.bot.user.avatar_url
+        )
 
-        async with ClientSession(loop= self.bot.loop) as http:
-            webhook = Webhook.from_url(self.commands_webhook_url, adapter= AsyncWebhookAdapter(http))
-            e = Embed(colour= 0xffc000, timestamp= dt.utcnow(), description= f"```{ctx.message.clean_content}```")
-            hashtag = ""
-            
-            if ctx.guild:
-                hashtag = "#"
-                e.set_thumbnail(url= ctx.guild.icon_url)
-                e.add_field(name= "Guild", value= ctx.guild.name)
-            
-            e.add_field(name= "Channel", value= f"{hashtag}{ctx.channel}")
-            e.set_author(name= "Command run", icon_url= "https://yokoent.com/images/exclamation-mark-png-9.png")
-            e.set_footer(text= f"{ctx.author} • {ctx.author.id}", icon_url= ctx.author.avatar_url)
+    @commands.Cog.listener(name="on_command")
+    async def command_run_webhook(self, ctx: commands.Context):
+        # TODO: Needs to be reformatted?
+        # TODO: This still fails in a try/except loop
+        try: self.bot.cmdlogger.info(f"{ctx.author}: {ctx.message.content}")
+        except: pass # Sometimes there's a whole lotta shit in the message that the bot can't decode
 
-            await webhook.send(embed= e, username= self.bot.user.name, avatar_url= self.bot.user.avatar_url)
+        webhook = Webhook.from_url(self.commands_webhook_url, adapter=AsyncWebhookAdapter(self.sess))
+        e = Embed(
+            colour=0xFFC000,
+            timestamp=dt.utcnow(),
+            description=f"```{ctx.message.clean_content}```",
+        )
 
-    @Cog.listener()
-    async def on_member_update(self, before: Member, after: Member):
+        if ctx.guild:
+            e.set_thumbnail(url=ctx.guild.icon_url)
+            e.add_field(name="Guild", value=ctx.guild.name)
+
+        e.add_field(name="Channel", value=f"{'#' if ctx.guild else ''}{ctx.channel}")
+        e.set_author(name="Command run", icon_url="https://bit.ly/2p75wYc")
+        e.set_footer(text=f"{ctx.author} • {ctx.author.id}", icon_url=ctx.author.avatar_url)
+
+        await webhook.send(
+            embed=e, username=self.bot.user.name, avatar_url=self.bot.user.avatar_url
+        )
+
+    # Minecraft role events
+    @commands.Cog.listener(name="on_member_update")
+    async def minecraft_role(self, before: Member, after: Member):
         """Gives the `Minecraft` role to a user in my server if
         they start playing it\n
         Takes the role away if they stop playing it
         """
-        if before.guild.id == 553071847483375626:
-            Aactivities = [a.name for a in after.activities]
-            Bactivities = [a.name for a in before.activities]
-            mcRole = after.guild.get_role(590_054_428_200_140_810)
-            
-            if "Minecraft" in Aactivities and "Minecraft" not in Bactivities:
-                print(f"{after} just started playing minecraft")
-                await after.add_roles(mcRole, reason= "Started playing Minecraft")
-            if "Minecraft" in Bactivities and "Minecraft" not in Aactivities:
-                print(f"{after} just stopped playing Minecraft")
-                await after.remove_roles(mcRole, reason= "Stopped playing Minecraft")
+        guild = before.guild
+        if not guild or before.bot:
+            return
+        if str(guild.id) not in self.db.guild_minecraft_roles.keys():
+            return
+
+        role = guild.get_role(int(self.db.guild_minecraft_roles[str(guild.id)]))
+        b = [a.name for a in before.activities]
+        a = [a.name for a in after.activities]
+
+        if "Minecraft" in a and "Minecraft" not in b:
+            try:
+                await after.add_roles(role, reason="Started playing Minecraft")
+                self.bot.logger.debug(f"Adding minecraft role to {before} in {before.guild}")
+            except: pass  # Missing permissions
+        if "Minecraft" in b and "Minecraft" not in a:
+            try:
+                await after.remove_roles(role, reason="Stopped playing Minecraft")
+                self.bot.logger.debug(f"Removing minecraft role from {before} in {before.guild}")
+            except: pass  # Missing permissions
+
+    @commands.Cog.listener(name="on_guild_role_delete")
+    async def check_minecraft_role_deleted(self, role: Role):
+        # TODO: Maybe make a logger for `events`? (`guild` can fall under it)
+        self.bot.logger.debug(f"DELETED {role.name!r} {role.id} {role.guild}")
+        if str(role.id) in self.db.guild_minecraft_roles.values():
+            self.bot.logger.debug("This role was a minecraft role")
+            await self.db.set_minecraft_role(role.guild.id, None)
+            self.bot.logger.debug(f"Deleted the minecraft role for {role.guild.id} ({role.id})")
+
+    # Delete excess data >:)
+    @commands.Cog.listener(name="on_guild_remove")
+    async def thanos_snap_guild(self, guild: Guild):
+        return # FIXME: Make and test this
+        if not self.bot.delete_guild_data:
+            return
+        # TODO: Test this when I can be fucked
+        print(f"deleting guild data for {guild.id}")
+        await self.db.delete_guild(guild.id)
+    
+    @commands.Cog.listener(name="on_member_remove")
+    async def thanos_snap_user(self, member: Member):
+        user = self.bot.get_user(member.id)
+        if user:
+            return # Not removed from the bot's scope
+        # FIXME: Delete user data if the bot can't view it anymore
+
+    # Blacklist event
+    @commands.Cog.listener(name="on_guild_join")
+    async def check_blacklist_guilds(self, guild: Guild):
+        if not await self.db.is_guild_blacklisted(guild.id):
+            return
+
+        chnl = None
+        for channel in guild.text_channels:
+            perms = channel.permissions_for(guild.me)
+            if perms.send_messages:
+                chnl = channel
+                break
+
+        if not chnl:
+            return await guild.leave()
+        aidzman = await self.bot.fetch_user(self.bot.owner_id)
+        await chnl.send(
+            f"Hello residents of **{guild.name}** \N{WAVING HAND SIGN} " \
+            "It looks like you've been blacklisted from using this bot \N{CONFUSED FACE}\n" \
+            "If you think this is a mistake, please contact `{aidzman}` to undo this ban\n" \
+            "I'll just leave now \N{DOOR}"
+        )
+        await guild.leave()
+
+    # Google Analytics
+    @commands.Cog.listener(name="on_command")
+    async def analytics_on_command(self, ctx):
+        params = self.gparams.copy()
+        params.update({
+            "dp": f"/commands/{ctx.command.name}",
+            "cid": f"{ctx.author.id}",
+            "cs": f"{ctx.guild.id}" if ctx.guild else "PRIVATE_MESSAGE",
+            "dt": ctx.command.name,
+        })
+        async with self.sess.get(self.gurl, params=params) as r:
+            pass
+
+    @commands.Cog.listener(name="on_guild_join")
+    async def analytics_guild_join(self, guild: Guild):
+        params = self.gparams.copy()
+        params.update({
+            "dp": "/events/GUILD_ADD",
+            "cid": f"{guild.id}",
+            "cs": f"{guild.id}",
+            "dt": "GUILD_ADD",
+        })
+        async with self.sess.get(self.gurl, params=params) as r:
+            pass
+
+    @commands.Cog.listener(name="on_guild_remove")
+    async def on_guild_remove(self, guild: Guild):
+        params = self.gparams.copy()
+        params.update({
+            "dp": "/events/GUILD_REMOVE",
+            "cid": f"{guild.id}",
+            "cs": f"{guild.id}",
+            "dt": "GUILD_REMOVE",
+        })
+        async with self.sess.get(self.gurl, params=params) as r:
+            pass
 
 
-def setup(bot: Bot):
+def setup(bot: commands.Bot):
     bot.add_cog(Events(bot))

@@ -1,0 +1,59 @@
+/* Default styling */
+body {
+    background-color: #36393F;
+} * {
+    color:#75b9e7;
+    font-family: "Consolas";
+} a {
+    color: #75b9e7;
+}
+
+code {
+    padding: 0 5px 0 5px;
+    background: #2F3136;
+    color: #00A2E8;
+    border-radius: 5px;
+    font-family: monospace;
+    font-weight: bold;
+}
+
+button {
+    background-color: #363636;
+    border: 2px solid #75b9e7;
+    color: inherit;
+    padding: 8px 16px;
+    text-align: center;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 10px;
+}
+button:hover {
+    border: 2px solid #00A2E8;
+    color: #00A2E8;
+}
+/* TODO: Fix the css for the buttons/input so both the buttons on the guild picker and guild settings dont look like shit */
+input, button {
+    border: none;
+    border-bottom: 2px solid #00A2E8;
+    background-color: #2F3136;
+}
+
+/* Some pages have a center div */
+.center-div {
+    position: absolute;
+    margin: auto; overflow: auto;
+    top: 0; right: 0;
+    bottom: 0; left: 0;
+    width: 525px; height: 170px; /* This can be over-ridden */
+    background-color: #00A2E8;
+    border-radius: 4px;
+    text-align: center;
+    color: #EAE0C7;
+}
+
+/* Custom scrollbar (condensed) */
+::-webkit-scrollbar {width: 10px}
+::-webkit-scrollbar-track {background: #36393F}
+::-webkit-scrollbar-thumb {background: #2F3136}
+::-webkit-scrollbar-thumb:hover {background: #555}

@@ -1,0 +1,50 @@
+{# Setup #}
+{% extends "_base.jinja" %}
+{% block title %}Guild picker{% endblock title %}
+
+{% block head %}
+    <style>
+        h3 {color: #00A2DD}
+        .guild {display: flex}
+        .guild *:not(img) {margin: 0}
+        .guild img {
+            margin-right: 10px;
+            display: block;
+            border-radius:50%;
+            width:96px;
+            height:96px
+        }
+    </style>
+{% endblock head %}
+
+{% block body %}
+    <h2 style="margin-bottom: 0px">Guilds</h2>
+    <h3 style="margin: 0px">To refresh the options listed, <a href="/login">resignin with Discord</a></h3>
+    <h3 style="margin-top: 0px">Listed below are the servers where you have permissions to <code>Manage Server</code>. You can view and edit server settings such as the bot prefix, server IP and designated Minecraft role</h3>
+    
+    {% for guild in guilds %}
+        <div class="guild">
+            {% if guild.icon %}
+                <img alt="{{ guild.name }}'s icon" src="https://cdn.discordapp.com/icons/{{ guild.id }}/{{ guild.icon }}.png"/>
+            {% else %}
+                <img alt="{{ guild.name }} has no icon" src="/static/images/iconless.png"/>
+            {% endif %}
+            <br>
+            <div style="float:right">
+                <h2><b>{{ guild.name }}</b></h2>
+                {% if guild.id in guildids %}
+                    <a href="guildsettings/{{ guild.id }}">
+                        <button type="button">Edit settings</button>
+                    </a>
+                {% else %}
+                    <a href="{{ bot.invite_url(guildid=guild.id) }}" target="_blank">
+                        <button type="button">Invite bot</button>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        <br>
+    {% else %}
+        <p>You do not have <code>Manage Server</code> permissions in any of the guilds you are in</p>
+    {% endfor %}
+{% endblock body %}

@@ -2,7 +2,33 @@
 {% extends "_base.jinja" %}
 {% block title %}Commands{% endblock %}
 
+{% block head %}
+    <style>
+    td {
+        white-space: nowrap;
+    }
+    table td + td {border-left: 7.5px solid #36393F}
+    </style>
+{% endblock head %}
+
 {# Body content #}
 {% block body %}
-    << CONTENT HERE >>
+    <br><br>
+    {% for cog in data %}
+        <table>
+            <caption><h2>{{ cog }}</h2></caption>
+            <tr>
+                <th>Command</th>
+                <th>Usage</th>
+                <th>Help</th>
+            </tr>
+            {% for cmd in data[cog] %}
+                <tr>
+                    <td>{{ cmd.name }}</tb>
+                    <td><code>{{ bot.default_prefix }}{{ cmd }} {{ cmd.signature }}</code></tb>
+                    <td>{{ cmd.short_doc or "No help provided" }}</tb>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endfor %}
 {% endblock body %}

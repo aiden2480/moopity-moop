@@ -1,17 +1,20 @@
 {# Setup #}
 {% extends "_base.jinja" %}
-{% block title %}Home{% endblock %}
+{% block title %}Home{% endblock title %}
+{# TODO: This index page looks like shit.
+Add stuff that shows Moopity Moop's features, command count, etc.
+#}
 
 {# Body content #}
 {% block body %}
-    <h1>Moopity Moop</h1>
-    <h3>Config from database:</h3>
-        <p>MinecraftServers: {{ res[0] }}</p>
-        <p>GuildPrefixes: {{ res[1] }}</p>
-        <p>Request time taken: {{ (time() - start)*1000 }}ms</p>
+    <h1 style="margin-bottom: 0px">Moopity Moop</h1>
+    <p style="margin-top: none">{{ bot.description }}</p>
 
-    {% for i in range(1000) %}
-        <br>
-    {% endfor %}
-    ok
+    <h2>Features</h2>
+    <img src="/static/images/config.png" alt="Moopity Moop config command" style="width:300px">
+    <p>Over <code>{{ len(bot.commands) }}</code> unique commands</p>
+    <p>A very sophisticated currency system with only two commands: <code>{{ bot.default_prefix }}daily</code> and <code>{{ bot.default_prefix }}steal</code></p>
+
+    <h2 style="margin-bottom: 0px">Guild settings</h2>
+    <p>Click <a href="/guildpicker">here</a> to change your guild config, such as the <code>Server IP</code>, <code>prefix</code> and <code>Minecraft role</code>.
 {% endblock body %}

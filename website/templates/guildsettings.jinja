@@ -1,0 +1,101 @@
+{% extends "_base.jinja" %}
+{% block title %}{{ guild.name }} settings{% endblock title %}
+
+{% block head %}
+    <style>
+        #settings-saved {color: #27CF93}
+        .guild {display: flex}
+        .guild *:not(img) {margin: 0}
+        .guild img {
+            margin-right: 10px;
+            display: block;
+            border-radius:50%;
+            width:96px;
+            height:96px
+        }
+        select {
+            border: none;
+            background-color: #2F3136;
+            border-bottom: 2px solid #3498db;
+        }
+        #button {
+            padding:7px;
+            width:8ch;
+            font-size:101%;
+            border-radius: 0px;
+        }
+        #button:hover {
+            border: none;
+            background-color: #2F3136;
+            border-bottom: 2px solid #3498db;
+            color: #00A2E8;
+            cursor: pointer;
+        }
+    </style>
+{% endblock head %}
+
+{% block body %}
+    {# Guild info block #}
+    <br>
+    <div class="guild">
+        {% if guild.icon %}
+            <img alt="{{ guild.name }}'s icon" src="https://cdn.discordapp.com/icons/{{ guild.id }}/{{ guild.icon }}.png"/>
+        {% else %}
+            <img alt="{{ guild.name }} has no icon" src="/static/images/iconless.png"/>
+        {% endif %}
+        <br>
+        <div style="float:right">
+            <h2>{{ guild.name }}</h2>
+            <h3>Bot nickname: <code>{{ guild.me.display_name }}</code></h3>
+            <h3>Bot top role: <code>{{ guild.me.top_role }}</code></h3>
+        </div>
+    </div>
+
+    {# The various settings you can change #}
+    <h3>Prefix
+        <input form="settings" name="prefix" value="{{ prefix }}" placeholder="{{ bot.default_prefix }} (default)" style="width: 15ch" maxlength="15">
+    </h3>
+
+    <h3>Server IP
+        <input form="settings" name="serverip" value="{{ serverip }}" placeholder="Set the Minecraft Server IP" style="width: 35ch" maxlength="35">
+    </h3>
+
+    <h3>Minecraft role
+        <select name="minecraftrole" form="settings" id="minecraftrole">
+            <option value="" style="color: #B9BBBE">Disabled</option>
+            {% for role in reversed(guild.roles) %}
+                {% set disabled = "disabled" if role >= guild.me.top_role %}
+                {% set lock, colour = "🔒 " if disabled, "#818386" if disabled else get_role_colour(role) %}
+                {% if not (role.managed or (role.position==0)) %}
+                    <option value="{{ role.id }}" style="color: {{ colour }}" {{ disabled }}>{{ lock }}{{ role }}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+    </h3>
+    <script>document.getElementById("minecraftrole").value="{{ mcrole.id or '' }}"</script>
+
+    {# Finally we get to the action form lol #}
+    <form method="POST" id="settings">
+        <button id="button" onclick="location.href=location.href;">Cancel</button>
+        <input type="submit" id="button">
+        {% if saved %}
+            <h3 id="settings-saved" style="display:inline">Your settings have been saved</h3>
+            <script>
+                var s = document.getElementById("settings-saved").style; s.opacity = 1;
+                setTimeout(function(){
+                    (function fade(){(s.opacity-=.05)<0?s.display="none":setTimeout(fade,40)})();
+                }, 3000);
+            </script>
+        {% endif %}
+    </form>
+    <br>
+
+    {# Provide a brief description of each setting #}
+    <p>The prefix is what the bot uses, along with a mention (<code>@{{ guild.me }}</code>) to invoke commands, such as <code>{{ prefix or bot.default_prefix }}help</code>. The bot's default prefix is <code>{{ bot.default_prefix }}</code>, but can easily be changed by using the command <code>{{ prefix or bot.default_prefix }}prefix &lt;prefix&gt;</code> or changing it above. If the above input is left blank, the bot's prefix will be set to the default</p>
+
+    <p>The server IP is Minecraft-style format, eg <code>mc.hypixel.net</code> or <code>play.hivemc.com</code> of <i>your</i> Minecraft server. Moopity Moop pings that IP frequently to test if your server is online, and if it is, sets its nickname to include data about how many players are currently online, the max amount of players, and the current server latency. EG: <code>23/48 players 25ms ping</code>. If the server has been detected as offline, Moopity Moop will set its nickname to <code>OFFLINE</code>. <b>This will only work if Moopity Moop has <code>Change own nickname</code> permissions</b></p>
+
+    <p>The minecraft role is a role pre-created in your server. When the bot sees that someone has just started playing Minecraft, it will give them said role. This could be useful for accessing private voice chats, coloured names in chat, etc. You could also make the role hoisted so you can easily tell. <b>This requires that the role set be below Moopity Moop's top role. You cannot set the role to any managed role, such as one created by Twitch, or a bot's personal role</b></p>
+
+    {# TODO: Make some GIFs of the commands below here #}
+{% endblock body %}

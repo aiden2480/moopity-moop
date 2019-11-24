@@ -1,0 +1,70 @@
+{# Setup #}
+{% extends "_base.jinja" %}
+{% block title %}{% if guild %}
+{{ guild }}'s leaderboard{% else %}Leaderboard
+{% endif %}{% endblock title %}
+
+{% block head %}
+    <style>
+        .guild {display: flex}
+        .guild *:not(img) {margin: 0}
+        .guild img {
+            margin-right: 10px;
+            display: block;
+            border-radius:50%;
+            width:96px;
+            height:96px
+        }
+        #leaderboard {
+            background-color: #2F3136;
+        }
+    </style>
+{% endblock head %}
+
+{% block body %}
+    {% if guild %}
+    <div class="guild">
+        {% if guild.icon %}
+            <img alt="{{ guild.name }}'s icon" src="https://cdn.discordapp.com/icons/{{ guild.id }}/{{ guild.icon }}.png"/>
+        {% else %}
+            <img alt="{{ guild.name }} has no icon" src="/static/images/iconless.png"/>
+        {% endif %}
+        <br>
+        <div style="float:right">
+            <h2>{{ guild.name }}</h2>
+            <h3>Total members: <code>{{ len(guild.members) }}</code></h3>
+            <h3>Members in leaderboard: <code>{{ len(data.keys()) }}</code></h3>
+        </div>
+    </div>
+    {% else %}
+    <div class="guild">
+        <img alt="{{ bot.user }}'s icon" src="{{ bot.user.avatar_url }}"/>
+        <br>
+        <div style="float:right">
+            <h2>{{ bot.user.name }}'s global leaderboard</h2>
+            {#<h3>Total bot users: <code>{{ len(bot.members) }}</code></h3>#}
+            <h3>Members in leaderboard: <code>{{ len(data.keys()) }}</code></h3>
+        </div>
+    </div>
+    {% endif %}
+    <br>
+    
+    <div id="leaderboard">
+    {% for id_, amount in data.items() %}
+        {% set user, index=bot.get_user(id_), list(data.keys()).index(id_)+1 %}
+        {% set url=db.LEADERBOARD_URL_KEY.get(index, db.LEADERBOARD_DEFAULT_URL) %}
+        <div class="guild">
+            <img src="https://discordapp.com/assets/{{ url }}.svg" style="border-radius:0px; height:36px">
+            <img src="{{ user.avatar_url }}" style="height:48px; width:48px; border-radius:50%">
+            <br>
+            <div style="float:right">
+                <h3>{{user}} has <code>${{ amount }}</code></h3>
+            </div>
+        </div>
+    {% else %}
+        {# Its unlikely that no one in any guild anywhere will have any money, because me,
+        so this should only run in a guild leaderboard anyway, no need for an if statement #}
+        <p>It seems that literally everybody in this server has no money whatsoever. Use the <code>{{ bot.default_prefix }}daily</code> command to get started</p>
+    {% endfor %}
+    </div>
+{% endblock body %}
