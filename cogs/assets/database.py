@@ -199,7 +199,7 @@ async def get_prefix(bot: commands.Bot, msg: Message):
     if msg.guild:
         if bot.is_ready():
             prfx = await bot.db.get_guild_prefix(msg.guild.id)
-            prefixes = [prfx] if prfx else prefixes
+            prefixes = [prfx] if prfx != None else prefixes
     else:
         prefixes.append("")
     return commands.when_mentioned_or(*prefixes)(bot, msg)

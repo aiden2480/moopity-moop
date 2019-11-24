@@ -59,7 +59,7 @@ class CustomBot(commands.AutoShardedBot):
         self.startup_time = dt.utcnow()  # Store bot startup time
         self.EmptyEmbed = CustomEmbed(self).EmptyEmbed  # Embed template (I'm cheating lol)
         self.default_prefix = "m!" if not self.development else "." # Yayeet
-        self.delete_guild_data = False if self.development else True # Delete guild data when the bot leaves
+        self.delete_data_on_remove = True if self.env.get("DELETE_DATA_ON_REMOVE", "False").upper() == "TRUE" else False
         self.website_url = "https://moopity-moop.chocolatejade42.repl.co" if not self.development else "http://localhost:8080"
         self.oauth_callback = f"{self.website_url}/login"
         self.get_dt = lambda:dt.utcnow()

@@ -37,7 +37,7 @@ class Config(commands.Cog):
         e.description += f"`{p}setserver <ip>` to set the IP for this server\n"
         e.description += f"\nTip: you can also change these settings on the [bot website]({self.bot.website_url}/guildsettings/{ctx.guild.id})\n"
         
-        e.add_field(name=f"Bot Prefix {emojis.craftingtable}", value=f"`{prfx}`" if prfx else prfx)
+        e.add_field(name=f"Bot Prefix {emojis.craftingtable}", value=f"`{prfx}`" if prfx else None)
         e.add_field(name=f"Minecraft Role \N{LARGE ORANGE DIAMOND}", value=role.mention if role else None)
         e.add_field(name=f"Minecraft Server {emojis.goldenapple}", value=f"`{server}`" if server else server)
         e.set_footer(text="Only users with 'Manage Server' permissions can change these settings", icon_url=self.bot.user.avatar_url)

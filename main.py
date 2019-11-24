@@ -220,9 +220,7 @@ async def on_command_error(ctx: commands.Context, error):
         )
         await ctx.send(embed=e)
     else:
-        format_error = lambda error: "\n".join(
-            format_exception(type(error), error, error.__traceback__, 10)
-        )
+        format_error = lambda error: "\n".join(format_exception(type(error), error, error.__traceback__, 10))
         error_code = f"`{error.original.__class__.__name__}//{int(time())}`"
         hashtag = "#" if ctx.guild else ""
         bot.logger.error(format_error(error))
@@ -244,7 +242,8 @@ async def on_command_error(ctx: commands.Context, error):
             bot.env["ERROR_WEBHOOK_URL"], adapter=AsyncWebhookAdapter(bot.session)
         )
         await webhook.send(
-            embed=e, username=bot.user.name, avatar_url=bot.user.avatar_url
+            embed=e, username=bot.user.name,
+            avatar_url=bot.user.avatar_url
         )
 
         em = Embed(

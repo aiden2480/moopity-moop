@@ -139,28 +139,27 @@ class Events(commands.Cog):
     @commands.Cog.listener(name="on_guild_role_delete")
     async def check_minecraft_role_deleted(self, role: Role):
         # TODO: Maybe make a logger for `events`? (`guild` can fall under it)
-        self.bot.logger.debug(f"DELETED {role.name!r} {role.id} {role.guild}")
         if str(role.id) in self.db.guild_minecraft_roles.values():
-            self.bot.logger.debug("This role was a minecraft role")
             await self.db.set_minecraft_role(role.guild.id, None)
             self.bot.logger.debug(f"Deleted the minecraft role for {role.guild.id} ({role.id})")
 
-    # Delete excess data >:)
+    # Thanos snap excess data
     @commands.Cog.listener(name="on_guild_remove")
     async def thanos_snap_guild(self, guild: Guild):
-        return # FIXME: Make and test this
-        if not self.bot.delete_guild_data:
-            return
-        # TODO: Test this when I can be fucked
-        print(f"deleting guild data for {guild.id}")
+        if not self.bot.delete_data_on_remove:
+            return # I decided to keep the data
+        self.bot.logger.debug(f"Deleting guild data for {guild}")
         await self.db.delete_guild(guild.id)
     
     @commands.Cog.listener(name="on_member_remove")
     async def thanos_snap_user(self, member: Member):
+        if not self.bot.delete_data_on_remove: return
         user = self.bot.get_user(member.id)
-        if user:
-            return # Not removed from the bot's scope
-        # FIXME: Delete user data if the bot can't view it anymore
+        if user or member.bot:
+            return # Not removed from the bot's scope/no data to delete
+        self.bot.logger.debug(f"Deleting user data for {member}")
+        await self.db.delete_user(member.id)
+
 
     # Blacklist event
     @commands.Cog.listener(name="on_guild_join")

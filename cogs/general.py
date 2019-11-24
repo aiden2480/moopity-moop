@@ -1,4 +1,4 @@
-from datetime import datetime as dt
+from datetime import datetime as dt, timedelta as td
 
 from discord import Colour, Embed
 from discord import __version__ as dpy_version
@@ -64,7 +64,7 @@ class General(commands.Cog):
         for commit in lastcommits:
             msg = commit["commit"]["message"].split("\n")[0]
             d = commit["commit"]["committer"]["date"]
-            date = naturaltime(dt.strptime(d, "%Y-%m-%dT%H:%M:%SZ"))
+            date = naturaltime(dt.strptime(d, "%Y-%m-%dT%H:%M:%SZ")+td(hours=11))
             i = f"[`{commit['sha'][:7]}`]({commit['html_url']}) {msg} ({date})"
             infoo += f"\n{i}"
 
@@ -96,19 +96,14 @@ class General(commands.Cog):
             [**Regular invite**]({self.bot.invite_url()})
             [Select Permissions]({self.bot.invite_url(-1)})
             [No permissions]({self.bot.invite_url(0)})
-        """,
-        )
+        """)
         e.add_field(
             name="Other links 👥",
             value=f"""
             [Discord invite]({self.bot.guild_invite_url})
             [Bot website]({self.bot.website_url})
-        """,
-        )
-        e.set_author(
-            name=f"Invite links for {self.bot.user}", icon_url=self.bot.user.avatar_url
-        )
-
+        """)
+        e.set_author(name=f"Invite links for {self.bot.user}", icon_url=self.bot.user.avatar_url)
         await ctx.send(embed=e)
 
     @commands.command()
