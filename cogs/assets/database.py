@@ -11,7 +11,7 @@ class Database(object):
     LEADERBOARD_DEFAULT_EMOJI = "\N{REMINDER RIBBON}"
     LEADERBOARD_URL_KEY = {1:"98fe9cdec2bf8ded782a7bf1e302b664", 2:"7d7c9561cc5ab5259ff8023b8ef86c99", 3:"0a00e865c445d42dfb9f64bedfab8cf8"}
     LEADERBOARD_DEFAULT_URL = "d702f2335a85d421e708bc9466571fa8"
-    # TODO: Delete guild from database if bot leaves guild
+
     def __init__(self, url: str = getenv("DATABASE_URL")):
         self.client = jsonstore.AsyncClient(url)
         get_event_loop().run_until_complete(self.update_cache())

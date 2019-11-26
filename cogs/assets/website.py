@@ -39,7 +39,9 @@ async def about(request: web.Request):
 @routes.get("/cmds")
 @template("cmds.jinja")
 async def cmds(request: web.Request):
-    return dict(data=request.app.cmddata)
+    numcmds = sum([len(cmds) for cog, cmds in request.app.cmddata.items()])
+    numcogs = len(request.app.cmddata.keys())
+    return dict(data=request.app.cmddata, numcmds=numcmds, numcogs=numcogs)
 
 
 # Navbar star routes
@@ -267,24 +269,16 @@ middlewares = [mw_update_globals]
 async def web_get_cmd_data(app: web.Application):
     """Gets the command data from the bot\n
     This should be added as an `on_startup` signal"""
-    # FIXME: Sort cogs
-    cmds = app["bot"].commands
-    cogs = {cmd.cog.__class__.__name__ for cmd in cmds if cmd.cog}
-    data = {cog: list() for cog in cogs}
+    cmds = sorted(app["bot"].commands, key=lambda cmd: cmd.cog_name)
+    cmds = sorted(cmds, key=lambda i:app["bot"].cog_load_order.index(i.cog))
+    cmds = [cmd for cmd in cmds if cmd.enabled and not cmd.hidden and cmd.name != "jishaku"]
+    cmds = [cmd for cmd in cmds if "is_owner" not in [chk.__qualname__.split(".")[0] for chk in cmd.checks]]
 
-    for cmd in cmds:
-        c = cmd.cog.__class__.__name__ if cmd.cog else "General"
-        chks = [chk.__qualname__.split(".")[0] for chk in cmd.checks]
-        # print(cmd.name, chks)
-        check = lambda cmd: all(
-            (not cmd.hidden, cmd.enabled, "is_owner" not in chks, cmd.name != "jishaku")
-        )
-        if check(cmd):
-            data[c].append(cmd)
+    data = {cog.qualified_name: list() for cog in app["bot"].cog_load_order}
+    [data[cmd.cog.qualified_name].append(cmd) for cmd in cmds]
     for cog in data.copy():
         if data[cog] == list():
             del data[cog]
-
     app.cmddata = data
 
 

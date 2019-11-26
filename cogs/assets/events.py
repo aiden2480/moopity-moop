@@ -2,9 +2,10 @@ from datetime import datetime as dt
 
 from discord import AsyncWebhookAdapter, Embed, Guild, Member, Role, Webhook
 from discord.ext import commands
+from cogs.assets.custom import CustomCog
 
 
-class Events(commands.Cog):
+class Events(CustomCog):
     """
     Handles all extra events for the bot that
     I don't want clogging up the main file. I've
@@ -26,6 +27,7 @@ class Events(commands.Cog):
     """
 
     def __init__(self, bot: commands.Bot):
+        super().__init__(self)
         self.bot = bot
         self.db = bot.db
         self.sess = bot.session
@@ -167,15 +169,14 @@ class Events(commands.Cog):
         if not await self.db.is_guild_blacklisted(guild.id):
             return
 
-        chnl = None
         for channel in guild.text_channels:
             perms = channel.permissions_for(guild.me)
             if perms.send_messages:
                 chnl = channel
                 break
-
-        if not chnl:
+        else: # No channels where bot can send messages
             return await guild.leave()
+
         aidzman = await self.bot.fetch_user(self.bot.owner_id)
         await chnl.send(
             f"Hello residents of **{guild.name}** \N{WAVING HAND SIGN} " \
@@ -223,5 +224,34 @@ class Events(commands.Cog):
             pass
 
 
+class DiscordBotListPosters(CustomCog):
+    """The cog that facilitates the posting of server
+    counts and member counts to the various bot lists
+    that I hope Moopity Moop will soon be a part of!"""
+
+    def __init__(self, bot: commands.Bot):
+        super().__init__(self)
+        self.bot = bot
+        self.sess = bot.session
+    
+    async def update_stats(self):
+        """Actually updates the stats on all the DBL websites"""
+        self.bot.logger.info("Updating bot stats on DBL websites..")
+
+        # await self.discordBotWorldAPI()
+        # await self.discordBotsGgAPI()
+        # await self.botListSpaceAPI()
+
+    # Add listeners
+    @commands.Cog.listener()
+    async def on_guild_join(self, guild: Guild):
+        await self.on_guild_update()
+    
+    @commands.Cog.listener()
+    async def on_guild_remove(self, guild: Guild):
+        await self.on_guild_update()
+
+
 def setup(bot: commands.Bot):
     bot.add_cog(Events(bot))
+    #bot.add_cog(DiscordBotListPosters(bot))

@@ -1,8 +1,9 @@
-import re
-import inspect
+from re import compile
+from inspect import getdoc
 from asyncio import sleep, TimeoutError as AsyncioTimeoutError
 from discord import Embed, Colour
-import itertools
+from itertools import groupby
+from datetime import datetime as dt
 
 
 class CannotPaginate(Exception):
@@ -233,7 +234,7 @@ class FieldPages(Pages):
 
 
 
-_mention = re.compile(r"<@\!?([0-9]{1,19})>")
+_mention = compile(r"<@\!?([0-9]{1,19})>")
 
 
 def cleanup_prefix(bot, prefix):
@@ -294,18 +295,15 @@ class HelpPaginator(Pages):
         cog_name = cog.__class__.__name__
 
         # get the commands
-        entries = sorted(cog.get_commands(), key= lambda c: c.name) # sorted(ctx.bot.get_cog_commands(cog_name), key= lambda c: c.name)
+        entries = sorted(cog.get_commands(), key= lambda c: c.name)
 
         # remove the ones we can't run
         entries = [cmd for cmd in entries if (await _can_run(cmd, ctx)) and cmd.enabled and not cmd.hidden]
 
         self = cls(ctx, entries)
         self.title = f"{cog_name} Commands"
-        self.description = inspect.getdoc(cog) + f"\nFor more help, [join the support server]({self.bot.guild_invite_url})"
+        self.description = getdoc(cog) + f"\nFor more help, [join the support server]({self.bot.guild_invite_url})"
         self.prefix = cleanup_prefix(ctx.bot, ctx.prefix)
-
-        # no longer need the database
-        # await ctx.release()
 
         return self
 
@@ -327,17 +325,12 @@ class HelpPaginator(Pages):
             self.description = command.help or "No help given."
 
         self.prefix = cleanup_prefix(ctx.bot, ctx.prefix)
-        # await ctx.release()
         return self
 
     @classmethod
     async def from_bot(cls, ctx):
         # XXX: This is how I managed to sort the cogs
-        def chk(cog):
-            if hasattr(cog, "config"):
-                return cog.config.get("loadtime", ctx.bot.get_dt())
-            return ctx.bot.get_dt()
-        cogs = sorted(ctx.bot.cogs, key=lambda i:chk(i))
+        cogs = sorted(ctx.bot.cogs, key=lambda i:ctx.bot.cogs[i].__cog_settings__["loadtime"])
 
         def key(cmd):
             return cmd.cog_name or "\u200bMisc"
@@ -352,7 +345,7 @@ class HelpPaginator(Pages):
         # 1: (cog, desc, commands) (max len == 9)
         # ...
 
-        for cog, commands in itertools.groupby(entries, key=key):
+        for cog, commands in groupby(entries, key=key):
             plausible = [cmd for cmd in commands if (await _can_run(cmd, ctx)) and cmd.enabled and not cmd.hidden]
             if len(plausible) == 0:
                 continue
@@ -361,7 +354,7 @@ class HelpPaginator(Pages):
             if description is None:
                 description = ""
             else:
-                description = inspect.getdoc(description) or ""
+                description = getdoc(description) or ""
 
             nested_pages.extend(
                 (cog, description, plausible[i : i + per_page])
@@ -390,14 +383,7 @@ class HelpPaginator(Pages):
         self.embed.description = self.description
         self.embed.title = self.title
 
-        if hasattr(self, "_is_bot"):
-            # value = f"For more help, [join the support server]({SUPPORT_GUILD_INVITE})"
-            # self.embed.add_field(name= "More help", value= value, inline=False)
-            # Added just above
-            pass
-
         self.embed.set_footer(text=f'Use "{self.prefix}help command" for more info on a command.')
-
         signature = _command_signature
 
         for entry in entries:

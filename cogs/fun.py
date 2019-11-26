@@ -9,16 +9,18 @@ from akinator import CantGoBackAnyFurther
 from akinator.async_aki import Akinator
 from discord import Colour, Embed, File
 from discord.ext import commands
+from cogs.assets.custom import CustomCog
 
 GLITCH_ALL = "".join((chr(i) for i in range(0x300, 0x370))) + "".join((chr(i) for i in range(0x483, 0x48a)))
 
 
-class Fun(commands.Cog):
+class Fun(CustomCog):
     """Fun commands such as games and special features
     Some have absolutely nothing to do with Minecraft! yay!"""
     # TODO: Make a cog listener that gives user money for using the commands
 
     def __init__(self, bot: commands.Bot):
+        super().__init__(self)
         self.bot = bot
         self.db = bot.db
         self.sess = bot.session

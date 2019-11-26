@@ -3,16 +3,18 @@ from typing import Optional
 
 from discord import Colour, Embed, Member, User
 from discord.ext import commands
+from cogs.assets.custom import CustomCog
 
 MIN_STEAL_AMOUNT = 30
 MAX_STEAL_AMOUNT = 2000
 
 
-class Currency(commands.Cog):
+class Currency(CustomCog):
     """What's better than a currency system
     where all you can do is steal money from other people?"""
 
     def __init__(self, bot: commands.Bot):
+        super().__init__(self)
         self.bot = bot
         self.db = bot.db
 
@@ -157,14 +159,15 @@ class Currency(commands.Cog):
             # TODO: This is going to suck a lot lmao
 
 
-class AdminCurrency(commands.Cog):
+class AdminCurrency(CustomCog):
     def __init__(self, bot: commands.Bot):
+        super().__init__(self)
         self.bot = bot
         self.db = bot.db
 
     @commands.command()
     @commands.is_owner()
-    async def givemoney(self, ctx, user: Optional[Member] = None, amount=100):
+    async def givemoney(self, ctx, user: Optional[User] = None, amount=100):
         usr = user or ctx.author
         await self.db.add_user_money(usr.id, amount)
         await ctx.send(f":thumbsup: Gave `${amount}` to **{usr}**")

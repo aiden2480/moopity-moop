@@ -6,6 +6,7 @@ from time import ctime, time
 from discord import Colour, Embed
 from discord.ext import commands
 from humanize import naturaltime
+from cogs.assets.custom import CustomCog
 
 MINECRAFT_STATUS_EMOJI = dict(
     green="\N{WHITE HEAVY CHECK MARK}",
@@ -13,10 +14,11 @@ MINECRAFT_STATUS_EMOJI = dict(
     red="\N{NO ENTRY}",
 )
 
-class Minecraft(commands.Cog):
+class Minecraft(CustomCog):
     """Commands for Minecraft"""
 
     def __init__(self, bot: commands.Bot):
+        super().__init__(self)
         self.bot = bot
         self.sess = bot.session
 

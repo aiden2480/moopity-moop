@@ -4,12 +4,14 @@ from datetime import datetime as dt
 
 from discord import Embed, Colour
 from discord.ext import commands
+from cogs.assets.custom import CustomCog
 
 BASE_URL="https://memegen.chocolatejade42.repl.co"
 
-class Image(commands.Cog):
+class Image(CustomCog):
     """Image generation commands"""
     def __init__(self, bot: commands.Bot):
+        super().__init__(self)
         self.bot = bot
         self.sess = bot.session
     
@@ -43,9 +45,8 @@ class Image(commands.Cog):
             return await ctx.send(f"You must send text in the format `{ctx.prefix}{ctx.command} first | second`")
         first = args[0].strip()
         second = args[1].strip()
-        url=f"{BASE_URL}/catmeme.jpg?{urlencode({'first':first, 'second':second})}"
-        embed.set_image(url=url)
-        await ctx.send(url, embed=embed)
+        embed.set_image(url=f"{BASE_URL}/catmeme.jpg?{urlencode({'first':first, 'second':second})}")
+        await ctx.send(embed=embed)
 
 
 def setup(bot: commands.Bot):

@@ -1,11 +1,13 @@
 from discord import Colour, Embed, Game
 from discord.ext import commands
+from cogs.assets.custom import CustomCog
 
 
-class Hidden(commands.Cog, command_attrs=dict(hidden=True)):
+class Hidden(CustomCog, command_attrs=dict(hidden=True)):
     """Congrats you have found the hidden commands for the bot *shudders*"""
 
     def __init__(self, bot: commands.Bot):
+        super().__init__(self)
         self.bot = bot
 
     @commands.command(aliases=["\N{SHORTCAKE}"])

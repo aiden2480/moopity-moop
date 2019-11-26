@@ -20,7 +20,7 @@ from jinja2 import FileSystemLoader
 from json_store_client import EmptyResponseWarning
 from logging import getLogger
 
-from cogs.assets.custombot import CustomBot
+from cogs.assets.custom import CustomBot
 from cogs.assets.database import get_prefix as prefix
 from cogs.assets.website import OAUTH_SCOPE, middlewares
 from cogs.assets.website import routes as web_routes
@@ -61,6 +61,10 @@ async def on_ready():
     bot.ready_time = dt.utcnow()
     bot.logger.info("Bot ready - {0.name!r} ({0.id})".format(bot.user))
     await bot.db.update_cache()
+    bot.database_ready = True
+    bot.logger.info("Database ready")
+    bot.load_extension("cogs.assets.periodic")
+    bot.logger.debug("Loaded periodic cog")
 
     # Update env on site
     env = jinja_env(site)
@@ -109,10 +113,6 @@ async def on_connect():
 @bot.event
 async def on_disconnect():
     bot.logger.debug(f"Bot disconnected at {dt.now():%H:%M:%S}")
-    await bot.change_presence(
-        status=Status.idle, afk=True,
-        activity=Game(name="disconnected.. Massive F 😟")
-    )
 
 
 @bot.event
@@ -121,7 +121,9 @@ async def on_message(m: Message):
         return
 
     # Process commands
-    await bot.wait_until_ready()
+    #await bot.wait_until_ready()
+    if not bot.is_ready():
+        return await m.channel.send("\N{STOPWATCH} The bot's internal cache is not yet ready. Please wait a few minutes")
     await bot.process_commands(m)
 
     # Just in case some idiot managed to lose the prefix
@@ -260,6 +262,7 @@ async def on_command_error(ctx: commands.Context, error):
 # Finally start the app!
 if __name__ == "__main__":
     loop = bot.loop
+    bot.logger.debug("Loading cogs")
     for cog in [
         "general",
         "minecraft",
@@ -271,12 +274,14 @@ if __name__ == "__main__":
         "hidden",
         # Extra cogs
         "assets.events",
-        "assets.periodic",
+        # "assets.periodic", # Added in on_ready
     ]: bot.load_extension(f"cogs.{cog}")
     bot.load_extension("jishaku")
+    bot.logger.debug("Cogs loaded")
 
-    # Suppress those useless warnings
+    # Warnings
     filterwarnings("ignore", category=EmptyResponseWarning)
+    [bot.logger.warning(f"Disabled command `{cmd!s}` found in cog `{cmd.cog.qualified_name}`") for cmd in bot.walk_commands() if not cmd.enabled]
 
     # Setup the website
     site.add_routes(web_routes)
@@ -289,7 +294,6 @@ if __name__ == "__main__":
     ]})
 
     # Run the website
-    site.logger.debug("Creating runner")
     webrunner = web.AppRunner(site)
     loop.run_until_complete(webrunner.setup())
     webserver = web.TCPSite(webrunner)

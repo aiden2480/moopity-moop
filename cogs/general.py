@@ -5,9 +5,10 @@ from discord import __version__ as dpy_version
 from discord.ext import commands
 from humanize import naturaltime
 from cogs.assets.paginator import HelpPaginator
+from cogs.assets.custom import CustomCog
 
 
-class General(commands.Cog):
+class General(CustomCog):
     """General commands for the bot"""
 
     def __init__(self, bot: commands.Bot):
@@ -114,44 +115,6 @@ class General(commands.Cog):
             description=f"I have been online for `{self.bot.get_uptime()}` \N{ROBOT FACE}",
         ))
 
-    @commands.command(name="hello", aliases=[""], enabled=False)
-    async def _hello(self, ctx):
-        # TODO: Make this invoke without a command
-        print("prefix", ctx.prefix)
-        print("mention", ctx.guild.me.mention)
-
-        if not ctx.guild:
-            return print("in dm!")
-        if ctx.prefix.split() != ctx.guild.me.mention.split():
-            return print("prefixes don't match")
-
-        print("checks passed!")
-        prfx = await self.bot.db.get_guild_prefix(ctx.guild.id) or self.bot.default_prefix
-        await ctx.send(
-            f"Hello **{ctx.author}** \N{WAVING HAND SIGN} "
-            f"My prefix in this server is `{prfx}`"
-        )
-
-    @commands.command(enabled=False)
-    async def h(self, ctx, name):
-        cmd = self.bot.get_command(name)
-        if not cmd:
-            return await ctx.send("Not a command")
-        ch = list()
-
-        checks = set(cmd.checks)
-        for chk in checks:
-            name = str(chk).split(" ")[1].split(".")[0]
-            ch.append(name.replace("_", " "))
-        await ctx.send(", ".join(ch) or "No checks \N{SHRUG}")
-    
-    # TODO: fix leaderboard command, the bot shouldn't have money and the person isn't in the guild any more
-    @commands.command(enabled=False)
-    async def c(self, ctx, name):
-        cmd = self.bot.get_command(name)
-        if not cmd:
-            return await ctx.send("Not a command")
-        await ctx.send(cmd._buckets._cooldown or "No cooldown on that command")
 
 def setup(bot: commands.Bot):
     bot.remove_command("help")

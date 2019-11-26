@@ -3,13 +3,15 @@ from typing import Union
 
 from discord import Colour, Embed, Role
 from discord.ext import commands
+from cogs.assets.custom import CustomCog
 
 
-class Config(commands.Cog):
+class Config(CustomCog):
     # TODO: You only need admin permissions to change the prefix lmao not view it
     """The custom settings for your server"""
 
     def __init__(self, bot: commands.Bot):
+        super().__init__(self)
         self.bot = bot
         self.db = bot.db
 

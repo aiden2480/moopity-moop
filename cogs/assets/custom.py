@@ -5,6 +5,7 @@ from os import environ, path
 from aiohttp import ClientSession
 from discord import Colour, Embed, Permissions, utils
 from discord.ext import commands
+from typing import List, Any
 
 from cogs.assets import database
 
@@ -13,7 +14,6 @@ except ImportError: pass
 else: load_dotenv(path.join(path.dirname(path.dirname(path.dirname(__file__))), ".env"))
 
 
-Default = "Any"
 
 # Helper classes
 class CustomEmbed(object):
@@ -62,7 +62,7 @@ class CustomBot(commands.AutoShardedBot):
         self.delete_data_on_remove = True if self.env.get("DELETE_DATA_ON_REMOVE", "False").upper() == "TRUE" else False
         self.website_url = "https://moopity-moop.chocolatejade42.repl.co" if not self.development else "http://localhost:8080"
         self.oauth_callback = f"{self.website_url}/login"
-        self.get_dt = lambda:dt.utcnow()
+        self.database_ready = False
 
         # Set up logging
         self.logger = getLogger("bot")
@@ -87,9 +87,7 @@ class CustomBot(commands.AutoShardedBot):
         self._weblogger.addHandler(stream)
         self._weblogger.addHandler(fileh)
         self._weblogger.setLevel(self.env.get("LOG_LEVEL", 10))
-
-        self.logger.debug("Created bot logger")
-        self._weblogger.debug("Created web logger")
+        self._weblogger.debug("Creating bot object")
 
         # A big 'ol list of emojis
         self.emoji = AttrDict({
@@ -104,7 +102,7 @@ class CustomBot(commands.AutoShardedBot):
         })
 
     # Redefined class methods
-    def run(self, *args, **kwargs):
+    def run(self, *args, **kwargs) -> None:
         """Runs the bot, waow! (`Blocking`)"""
         kwargs["reconnect"] = True
         super().run(self.env["BOT_TOKEN"], *args, **kwargs)
@@ -112,27 +110,29 @@ class CustomBot(commands.AutoShardedBot):
     async def logout(self, *args, **kwargs):
         self.logger.debug("Closing custom aiohttp ClientSession")
         await self.session.close()
+        
         if hasattr(self, "webrunner"):
             self.logger.debug("Closing website runner")
             await self.webrunner.cleanup()
+        
         self.logger.debug("Running original discord.py logout")
         await super().logout(*args, **kwargs)
     
-    def add_cog(self, cog, *, hide=False):
+    def add_cog(self, cog, *, hide=False) -> None:
         """If param `hide` is `True`, the load
         time of the cog will be set to a time far
         beyond that of the others, putting it at the back"""
         try: super().add_cog(cog)
         except: return
-        d = dt.utcnow() if not hide else dt.utcnow()+td(weeks=4)
 
-        if hasattr(cog, "config"):
-            try: cog.config["loadtime"]
-            except KeyError: cog.config["loadtime"] = d
-        else:
-            cog.config = dict(loadtime=d)
+        d = dt.utcnow() if not hide else dt.utcnow()+td(weeks=4)
+        cog.__cog_settings__["loadtime"] = d
 
     # Other functions
+    @property
+    def cog_load_order(self) -> List[commands.Cog]:
+        return sorted(self.cogs.values(), key=lambda c:c.__cog_settings__["loadtime"])
+    
     def time_between(self, dateone: dt, datetwo: dt) -> str:
         """Find the time between `dateone` and `datetwo` and
         return it in a human readable format fit for discord!\n
@@ -146,13 +146,7 @@ class CustomBot(commands.AutoShardedBot):
             int(((ut % (60 * 60 * 24)) % (60 * 60)) % 60),
         ]
         uptime = [f"{i} {key[u]}" for u, i in enumerate(ut) if i != 0]
-
-        if len(uptime) == 1:
-            uptime = uptime[0]
-        else:
-            uptime = ", ".join(uptime[:-1]) + " and " + uptime[-1]
-
-        return uptime
+        return uptime[0] if len(uptime) == 1 else ", ".join(uptime[:-1]) + " and " + uptime[-1]
 
     def get_uptime(self) -> str:
         """Find the uptime of the bot (fmt: relative `d`/`h`/`m`/`s`)"""
@@ -166,3 +160,11 @@ class CustomBot(commands.AutoShardedBot):
             redirect_uri=self.guild_invite_url,
         )
         return f"{url}&guild_id={guildid}" if guildid else url
+
+
+# I'll also make a custom Cog class, for logging pruposes
+class CustomCog(commands.Cog):
+    def __init__(self, cog):
+        print("LOADING COG")
+        print(cog)
+        self.lol = "no u"

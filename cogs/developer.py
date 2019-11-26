@@ -7,9 +7,10 @@ from time import time
 
 from discord import Colour, Embed, Member
 from discord.ext import commands
+from cogs.assets.custom import CustomCog
 
 
-class Developer(commands.Cog):
+class Developer(CustomCog):
     """Developer commands to manage the bot"""
 
     def __init__(self, bot: commands.Bot):

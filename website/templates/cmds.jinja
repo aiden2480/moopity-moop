@@ -4,23 +4,27 @@
 
 {% block head %}
     <style>
-    td {
-        white-space: nowrap;
-    }
-    table td + td {border-left: 7.5px solid #36393F}
+        /*td {white-space: nowrap}*/
+        td[colspan="2"] {font-size: 150%; padding-top: 10px; font-weight: bold; text-align: center}
+        table td + td {border-left: 7.5px solid #36393F}
     </style>
 {% endblock head %}
 
 {# Body content #}
 {% block body %}
-    <br><br>
-    {% for cog in data %}
-        <table>
-            <caption><h2>{{ cog }}</h2></caption>
+    <h1>Moopity Moop's commands</h1>
+    <p>Listed below are the <code>{{ numcmds }}</code> commands across <code>{{ numcogs }}</code> cogs</p>
+    <br>
+    {# TODO: The styling on this still looks like shit #}
+    <table>
+        <tr>
+            <th>Command</th>
+            <th>Usage</th>
+            <th>Help</th>
+        </tr>
+        {% for cog in data %}
             <tr>
-                <th>Command</th>
-                <th>Usage</th>
-                <th>Help</th>
+                <td colspan="2">{{ cog }} commands</td>
             </tr>
             {% for cmd in data[cog] %}
                 <tr>
@@ -29,6 +33,6 @@
                     <td>{{ cmd.short_doc or "No help provided" }}</tb>
                 </tr>
             {% endfor %}
-        </table>
-    {% endfor %}
+        {% endfor %}
+    </table>
 {% endblock body %}
