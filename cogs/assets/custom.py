@@ -1,11 +1,13 @@
-from datetime import datetime as dt, timedelta as td
+from datetime import datetime as dt
+from datetime import timedelta as td
 from logging import FileHandler, Formatter, StreamHandler, getLogger
 from os import environ, path
+from typing import Any, List
+from subprocess import check_output
 
 from aiohttp import ClientSession
 from discord import Colour, Embed, Permissions, utils
 from discord.ext import commands
-from typing import List, Any
 
 from cogs.assets import database
 
@@ -63,6 +65,7 @@ class CustomBot(commands.AutoShardedBot):
         self.website_url = "https://moopity-moop.chocolatejade42.repl.co" if not self.development else "http://localhost:8080"
         self.oauth_callback = f"{self.website_url}/login"
         self.database_ready = False
+        self.VERSION = check_output("git describe --tags --always", shell=True).decode().strip()
 
         # Set up logging
         self.logger = getLogger("bot")
@@ -73,7 +76,7 @@ class CustomBot(commands.AutoShardedBot):
         location = "./moopitymoop.log" if self.development else "../moopitymoop.log"
         datefmt = "%H:%M:%S" if self.development else "%d/%m/%Y %H:%M:%S"
         fmode = "w" if self.development else "a"
-        formatter = Formatter("%(asctime)s %(name)s [%(levelname)s] %(message)s", datefmt=datefmt)
+        formatter = Formatter("%(asctime)s %(levelname)s [%(name)s] %(message)s", datefmt=datefmt)
         stream = StreamHandler()
         fileh = FileHandler(location, mode=fmode)
         stream.setLevel(10)
@@ -164,7 +167,7 @@ class CustomBot(commands.AutoShardedBot):
 
 # I'll also make a custom Cog class, for logging pruposes
 class CustomCog(commands.Cog):
-    def __init__(self, cog):
-        print("LOADING COG")
-        print(cog)
-        self.lol = "no u"
+    def __init__(self, cog: commands.Cog):
+        """Creates an instance of a regular cog,
+        with a few extra things I might want"""
+        cog.logger = getLogger(f"bot.cogs.{cog.qualified_name.lower()}")

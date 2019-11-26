@@ -208,18 +208,14 @@ async def guildsettings_backend(request: web.Request):
     oldserverip = await db.get_minecraft_server(guild.id) or ""
     oldminecraftrole = await db.get_minecraft_role(guild.id) or ""
 
-    print(data)
     prefix = data.get("prefix")
     serverip = data.get("serverip")
     minecraftrole = data.get("minecraftrole")
     if prefix != oldprefix and prefix != None:
-        print("updating prefix")
         await db.set_guild_prefix(guild.id, prefix)
     if serverip != oldserverip and serverip != None:
-        print("updating serverip")
         await db.set_minecraft_server(guild.id, serverip)
     if minecraftrole != str(oldminecraftrole) and minecraftrole != None:
-        print("updating minecraft role")
         await db.set_minecraft_role(guild.id, minecraftrole or None)
     return web.HTTPFound(f"/guildsettings/{guildid}?saved")
 

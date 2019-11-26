@@ -71,11 +71,11 @@ class General(CustomCog):
 
         fields = {
             "Developer \N{PERSONAL COMPUTER}": f"{aidzman}\n{aidzman.id}",
+            "Version \N{HAMMER AND WRENCH}": f"Bot version `{self.bot.VERSION}`\nDiscord.py `v{dpy_version}`",
             "Commands \N{SHORTCAKE}": len(global_commands),
-            "Ping \N{TABLE TENNIS PADDLE AND BALL}": f"{round(self.bot.latency * 1000, 2)}ms",
             "Guild count \N{SHIELD}": len(self.bot.guilds),
             "User count \N{BUSTS IN SILHOUETTE}": len(self.bot.users),
-            "Library \N{BOOKS}": f"Discord.py {dpy_version}",
+            "Ping \N{TABLE TENNIS PADDLE AND BALL}": f"{round(self.bot.latency * 1000, 2)}ms",
         }
 
         e.add_field(name="Last updates", value=infoo, inline=False)

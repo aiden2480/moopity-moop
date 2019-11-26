@@ -81,21 +81,23 @@ class Checker(object):
 class ServerStatus(CustomCog):
     # TODO: What happens when someone changes the IP while the bot is still pinging hmm?
     # TODO: Test if these changes actually work lmao
+    # TODO: Maybe add some admin commands idk
     """The cog that handles all the server pinging"""
 
     def __init__(self, bot: commands.Bot):
+        super().__init__(self)
         self.bot = bot
         self.db = bot.db
         self.tasks: List[Checker] = list()
         
-        self.bot.logger.debug(f"{self.__class__.__name__!r} cog ready, loading checkers")
+        self.logger.debug(f"{self.__class__.__name__!r} cog ready, loading checkers")
         for guild in self.db.guild_server_ips.items():
             self.create_task(int(guild[0]), guild[1])
-        self.bot.logger.debug("Finished loading checkers")
+        self.logger.debug("Finished loading checkers")
 
     def cog_unload(self):
         """Finish & close all pingers"""
-        self.bot.logger.debug(f"Closed {len(self.tasks)} tasks while unloading cog {self.__class__.__name__!r}")
+        self.logger.debug(f"Closed {len(self.tasks)} tasks while unloading cog {self.__class__.__name__!r}")
         return [task.tsk.stop() for task in self.tasks]
 
     def create_task(self, guildid: int, serverip: str):
@@ -120,8 +122,6 @@ class ServerStatus(CustomCog):
         ip = self.db.guild_server_ips.get(str(guildid))
         self.stop_task(guildid)
         self.create_task(guildid, ip)
-    
-    # TODO: Maybe add some admin commands idk
 
 
 def setup(bot: commands.Bot):

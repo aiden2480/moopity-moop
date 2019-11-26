@@ -122,21 +122,15 @@ async def on_message(m: Message):
 
     # Process commands
     #await bot.wait_until_ready()
-    if not bot.is_ready():
-        return await m.channel.send("\N{STOPWATCH} The bot's internal cache is not yet ready. Please wait a few minutes")
     await bot.process_commands(m)
 
     # Just in case some idiot managed to lose the prefix
     ctx = await bot.get_context(m)
     if ctx.invoked_subcommand is None and ctx.guild:
         if m.content.strip() == ctx.guild.me.mention:
-            # TODO: Fix this up (also in the general cog)
             await ctx.trigger_typing()
             prfx = await bot.db.get_guild_prefix(m.guild.id) or bot.default_prefix
-            await ctx.send(
-                f"Hello **{ctx.author}** \N{WAVING HAND SIGN} "
-                f"My prefix in this server is `{prfx}`"
-            )
+            await ctx.send(f"Hello **{ctx.author}** \N{WAVING HAND SIGN} My prefix in this server is `{prfx}`")
 
 
 @bot.event
@@ -177,6 +171,7 @@ async def on_command_error(ctx: commands.Context, error):
             e.description = "Bypassing disable.."
             msg = await ctx.send(embed=e)
 
+            # TODO: This doesn't pass args
             ctx.command.enabled = True
             await ctx.invoke(ctx.command)
             ctx.command.enabled = False
@@ -196,7 +191,7 @@ async def on_command_error(ctx: commands.Context, error):
         await ctx.send(embed=e)
     elif isinstance(error, commands.CommandOnCooldown):
         e.title = "This command is on cooldown!"
-        e.description = "Please try again in "+naturaltime(dt.utcnow()+td(seconds=error.retry_after), future=True)
+        e.description = "Please try again in "+naturaltime(dt.now()+td(seconds=error.retry_after), future=True)
         await ctx.send(embed=e)
     elif isinstance(error, commands.MissingPermissions):
         perms = [f"`{p.replace('_', ' ').capitalize()}`" for p in error.missing_perms]
@@ -300,6 +295,7 @@ if __name__ == "__main__":
     loop.run_until_complete(webserver.start())
     site.logger.info(f"Starting website on {webserver.name}")
     bot.webrunner = webrunner
+    # asyncio.ensure_future(web._run_app(site))
 
     # Run the bot
     try:

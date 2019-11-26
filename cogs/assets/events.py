@@ -130,12 +130,12 @@ class Events(CustomCog):
         if "Minecraft" in a and "Minecraft" not in b:
             try:
                 await after.add_roles(role, reason="Started playing Minecraft")
-                self.bot.logger.debug(f"Adding minecraft role to {before} in {before.guild}")
+                self.logger.debug(f"Adding minecraft role to {before} in {before.guild}")
             except: pass  # Missing permissions
         if "Minecraft" in b and "Minecraft" not in a:
             try:
                 await after.remove_roles(role, reason="Stopped playing Minecraft")
-                self.bot.logger.debug(f"Removing minecraft role from {before} in {before.guild}")
+                self.logger.debug(f"Removing minecraft role from {before} in {before.guild}")
             except: pass  # Missing permissions
 
     @commands.Cog.listener(name="on_guild_role_delete")
@@ -143,14 +143,14 @@ class Events(CustomCog):
         # TODO: Maybe make a logger for `events`? (`guild` can fall under it)
         if str(role.id) in self.db.guild_minecraft_roles.values():
             await self.db.set_minecraft_role(role.guild.id, None)
-            self.bot.logger.debug(f"Deleted the minecraft role for {role.guild.id} ({role.id})")
+            self.logger.debug(f"Deleted the minecraft role for {role.guild.id} ({role.id})")
 
     # Thanos snap excess data
     @commands.Cog.listener(name="on_guild_remove")
     async def thanos_snap_guild(self, guild: Guild):
         if not self.bot.delete_data_on_remove:
             return # I decided to keep the data
-        self.bot.logger.debug(f"Deleting guild data for {guild}")
+        self.logger.debug(f"Deleting guild data for {guild}")
         await self.db.delete_guild(guild.id)
     
     @commands.Cog.listener(name="on_member_remove")
@@ -159,7 +159,7 @@ class Events(CustomCog):
         user = self.bot.get_user(member.id)
         if user or member.bot:
             return # Not removed from the bot's scope/no data to delete
-        self.bot.logger.debug(f"Deleting user data for {member}")
+        self.logger.debug(f"Deleting user data for {member}")
         await self.db.delete_user(member.id)
 
 
@@ -236,7 +236,7 @@ class DiscordBotListPosters(CustomCog):
     
     async def update_stats(self):
         """Actually updates the stats on all the DBL websites"""
-        self.bot.logger.info("Updating bot stats on DBL websites..")
+        self.logger.info("Updating bot stats on DBL websites..")
 
         # await self.discordBotWorldAPI()
         # await self.discordBotsGgAPI()
