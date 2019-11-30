@@ -1,18 +1,35 @@
 # Moopity Moop
-The repo for my bots code 😀 See https://moopity-moop.chocolatejade42.repl.co/ for the bots website (I know, I need to get a better domain 😒)
+[![support-server](https://img.shields.io/discord/496081601755611137?color=%233498DB&label=support%20server&style=flat-square)](https://discord.gg/AJj45Sj)
+[![updates](https://img.shields.io/github/last-commit/aiden2480/moopity-moop?color=%233498DB&label=last%20update&style=flat-square)](https://github.com/aiden2480/moopity-moop)
+[![stargazers](https://img.shields.io/github/stars/aiden2480/moopity-moop?color=%233498DB&label=stargazers&style=flat-square)](https://github.com/aiden2480/moopity-moop/stargazers)
+[![website](https://img.shields.io/badge/website-click%20here-%233498DB?style=flat-square)](https://moopity-moop.chocolatejade42.repl.co)
 
-## Issues
-Right now, the biggest issue I'm having is with the website, I can't get the bloody session to retain the data that I set. I can set it fine in the `/login` route, but it always returns empty when I try to access it wtf
-PS: If this message is on GitHub, it means that I somehow managed to get past this issue and the website is working fine 🎉 (I swore to myself that I would push changes as soon as I fixed this, not a minute before, not a minute after)
+Moopity Moop is a feature rich bot with commands for Minecraft such as:
+ - Minging Minecraft servers in real-time to find player counts, latency, etc
+ - Auto-assigned Minecraft roles, for when a user starts playing Minecraft
+ - Find stats on popular servers such as Hypixel, or the Hive!
+ - Server MOTD checks and more!
+ 
+## Features
+[![Invite now!](website/static/images/config.png)](https://moopity-moop.chocolatejade42.repl.co/invite)
 
-## Todo list
-Stuff I have to do is unmarked, and stuff I'm slowly working on is marked.
+*A customisable prefix, a role automatically given to users when they start playing Minecraft, and a server IP for automatic pinging, which the bot then sets its nickname to*
 
-Any comment with `TODO` in it anywhere throughout the repo is also something I have to do but I can't be bothered to put it on here lmao.
+[![Invite now!](website/static/images/profile.png)](https://moopity-moop.chocolatejade42.repl.co/invite)
 
-Any comment containing `FIXME` is something that I can't be bothered to fix right now but should definitely fix before I roll out the next batch of changes
+*The bot sets its nickname to the result of the last ping test, or `OFFLINE` if the server is offline*
 
-`XXX` is just a glorified comment lmao. Just a flashy attention-grabber
+[![Invite now!](website/static/images/servercmd.png)](https://moopity-moop.chocolatejade42.repl.co/invite)
 
-# Bot features
-[![support-server](website/static/images/config.png)](https://discord.gg/AJj45Sj)
+*Retrieve stats about a Minecraft server in real time, providing MOTD, latency, and a player count*
+
+[![Invite now!](website/static/images/hypixelcmd.png)](https://moopity-moop.chocolatejade42.repl.co/invite)
+
+*Find player data on popular servers such as Hypixel, or the Hive*
+
+[![Invite now!](website/static/images/usercmd.png)](https://moopity-moop.chocolatejade42.repl.co/invite)
+
+*Get a players `UUID`, username history, skin, or skin texture*
+
+What are you waiting for? *[Invite now!](https://moopity-moop.chocolatejade42.repl.co/invite)*
+

@@ -1,21 +1,36 @@
 # Todo list
 
-[ ] Make `@commands.command` the first decorator on any command
-[ ] Create better command names/aliases
-[ ] Fix up the command descriptions/docs
-[ ] Rip off the help command from https://github.com/nguuuquaaa/Belphegor/blob/master/belphegor/help.py because that was a cool help command
-[ ] Make sure all ClientSessions are referenced as `sess` not `http` because that messes up discords internal cache
-[ ] Consider storing data in `aiohttp-session-file` instead of `aiohttp-session` EncryptedCookieStorage?
-[ ] Replace All references of `Guild` with `Server` in the front-end scripts
-[ ] Make an API for voting and the like?
-[ ] Get some https://badges.io for the readme
-[ ] Create a custom `commands.Context` class inside `cogs.assets.custom`
-    [ ] Make a function to add reactions, but fails silently
-[ ] Make the readme look nicer
-[ ] Open invite URL in new window
-    [ ] https://stackoverflow.com/questions/22444356/html-open-link-in-new-fixed-size-window
-[x] Get rid of all the `\N{NAME}` stoof because they look gross tbh
-[ ] Delete `EmptyEmbed`, I don't use it anyway
+[ ] repo
+    [x] Get some https://badges.io for the readme
+    [x] Make the readme look nicer
+    [ ] Reformat the size of the images in the readme
+
+[ ] bot
+    [x] Make `@commands.command` the first decorator on any command
+    [ ] Create better command names/aliases
+    [ ] Fix up the command descriptions/docs
+    [ ] Rip off the help command from https://github.com/nguuuquaaa/Belphegor/blob/master/belphegor/help.py because that was a cool help command
+    [x] Get rid of all the `\N{NAME}` stoof because they look gross tbh
+    [x] Delete `EmptyEmbed`, I don't use it anyway
+   
+    [ ] Since this is a **Minecraft** bot, ima need more **Minecraft** commands
+        [ ] Get recipes
+        [ ] Get achievements
+        [ ] Imgen for make-your-own-achievement
+        [ ] Colour codes command
+        [ ] Add more Minecraft server commands (`hypixel`, `hive`, etc)
+
+[ ] website
+    [ ] Convert the readme to HTML and make that the homepage ;)
+    [ ] Consider storing data in `aiohttp-session-file` instead of `aiohttp-session` EncryptedCookieStorage?
+    [ ] Replace All references of `Guild` with `Server` in the front-end scripts
+    [ ] Make an API for voting and the like?
+    [ ] Open invite URL in new window
+        [ ] https://stackoverflow.com/questions/22444356/html-open-link-in-new-fixed-size-window
+
+[ ] listing sites
+    [x] Create a global Markdown bot description that can be used on bot listing sites
+        [x] Just use the readme lmao
 
 [ ] Clean up files
     [ ] `cogs.assets.custom`

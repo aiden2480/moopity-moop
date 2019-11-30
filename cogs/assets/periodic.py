@@ -117,7 +117,6 @@ class ServerStatus(CustomCog):
     def reload_task(self, guildid: int):
         """Reload a task, updating the data to ping"""
         # TODO: Make this lol
-        print("reloading task")
         ip = self.db.guild_server_ips.get(str(guildid))
         self.stop_task(guildid)
         self.create_task(guildid, ip)
