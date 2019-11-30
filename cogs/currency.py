@@ -10,8 +10,8 @@ MAX_STEAL_AMOUNT = 2000
 
 
 class Currency(CustomCog):
-    """What's better than a currency system
-    where all you can do is steal money from other people?"""
+    """What's better than a currency system where all you can do is
+    steal money from other people?"""
 
     def __init__(self, bot: commands.Bot):
         super().__init__(self)
@@ -26,26 +26,25 @@ class Currency(CustomCog):
         moolah = await self.db.get_user_money(member.id)
         await ctx.send(f"**{member}** has `${moolah}`")
 
-    @commands.command(aliases=["lb", "topusers"])
+    @commands.command(aliases=["lb", "topusers", "leaders"])
     async def leaderboard(self, ctx):
-        # TODO: Shows users not in guild anymore
-        # TODO: Reformat the entire algorythm for sorting and move to `database.py`
-        """Shows who has the most amount
-        of money in this server"""
+        """Shows who has the most amount of money in this server"""
+        embed = Embed(colour=Colour.blue(), description="")
         if ctx.guild is None:
-            e = Embed(colour=Colour.blue(), description=f"[click here]({self.bot.website_url}/leaderboard)")
-            e.set_author(name="Global bot leaderboard", icon_url=self.bot.user.avatar_url)
-            return await ctx.send(embed=e)
+            embed.description=f"\N{TRIDENT EMBLEM} [Online global leaderboard]({self.bot.website_url}/leaderboard)"
+            embed.set_author(name="Global bot leaderboard", icon_url=self.bot.user.avatar_url)
+            return await ctx.send(embed=embed)
 
-        emj = self.db.LEADERBOARD_EMOJI_KEY
-        embed = Embed(colour=Colour.blue(), title="The richest users in this server", description="")
-        lbdata = await self.db.get_leaderboard(ctx.guild, 10)
+        embed.title = "The richest users in this server"
+        lbdata = await self.db.get_leaderboard(ctx.guild, maxusers=10)
         if not lbdata:
             embed.description += "It seems that literally everyone in this server is broke \N{SHRUG}\n"
             embed.description += f"Use {ctx.prefix}daily to get started"
         
         for id_, money in lbdata.items():
-            emoji = emj.get(len(embed.description.split("\n")), self.db.LEADERBOARD_DEFAULT_EMOJI)
+            emoji = self.db.LEADERBOARD_EMOJI_KEY.get(
+                len(embed.description.split("\n")),
+            self.db.LEADERBOARD_DEFAULT_EMOJI)
             embed.description += f"\n{emoji} **{self.bot.get_user(id_)}** has `${money:,}`"
         
         url = f"{self.bot.website_url}/leaderboard?guild={ctx.guild.id}"
@@ -56,9 +55,9 @@ class Currency(CustomCog):
     @commands.command(aliases=["freemoney"])
     @commands.cooldown(1, 60 * 60 * 4, commands.BucketType.user)
     async def daily(self, ctx):
-        """Redeem your daily money
-        Gives you a random amount of money between
-        300 and 375 dollars into your wallet"""
+        """Redeem your daily cash
+        Gives you a random amount of money between 300 and 375 dollars
+        into your wallet"""
         amount = 300 + randint(0, 75)
         await ctx.send(f"Redeemed your daily cheque for `${amount}` :thumbsup:")
         await self.db.add_user_money(ctx.author.id, amount)
@@ -67,13 +66,15 @@ class Currency(CustomCog):
     async def give(self, ctx, member:Member, amount: int):
         """I don't know why you would want to give away your hard earned money but sure"""
         if amount < 0:
-            await ctx.send("That's illegal!")
+            return await ctx.send("That's illegal!")
+        if member == ctx.author:
+            return await ctx.send("Giving yourself money? 🤔")
         
         await ctx.send(f"Congrats, you just wasted a hard earned `${amount}`")
         await self.db.add_user_money(ctx.author.id, -amount)
         await self.db.add_user_money(member.id, amount)
 
-    @commands.command()
+    @commands.command(enabled=False)
     @commands.guild_only()
     @commands.cooldown(1, 30, commands.BucketType.member)
     async def steal(self, ctx, victim: Member):
@@ -89,20 +90,23 @@ class Currency(CustomCog):
         The only bot that you can steal from is this one.
         However, there is a 60% chance that you will fail,
         but also a 125% reward if you are successful"""
+        # FIXME: Check this hasn't broken again
         you = await self.db.get_user_money(ctx.author.id, human_readable=False)
         vtm = await self.db.get_user_money(victim.id, human_readable=False)
+        win = randint(0, 100) > 35
+        amount = randint(MIN_STEAL_AMOUNT, MAX_STEAL_AMOUNT)
+
+        if victim == ctx.author:
+            return await ctx.send("Congratulations, you played yourself")
         if victim.bot and victim != ctx.guild.me:
             return await ctx.send(f"Uh oh, you can't steal from bots! \N{ROBOT FACE} ~~||except me||~~")
         if you < 75:
             return await ctx.send(f"You must have at least `$75` to steal from someone. You still need another `${75-you}` \N{SHRUG}")
         if vtm < 75 and victim != ctx.guild.me:
             return await ctx.send(f"Not worth it, **{victim}** only has `${vtm}`")
-
-        win = randint(0, 100) > 35
-        amount = randint(MIN_STEAL_AMOUNT, MAX_STEAL_AMOUNT)
-
         if victim == ctx.guild.me:
             win = randint(0, 100) > 60
+
 
         if win:
             while amount > vtm:
@@ -118,8 +122,7 @@ class Currency(CustomCog):
                 amount = randint(MIN_STEAL_AMOUNT, amount)
 
             msg=await ctx.send(f"Massive 🇫 for **{ctx.author}** who tried (and failed) steal from **{victim}** and had to pay them `${amount}`")
-            try: await msg.add_reaction("🇫")
-            except: pass
+            await ctx.react(msg, "🇫")
             amount=-amount
 
         # Transfer the money
@@ -148,6 +151,7 @@ class Currency(CustomCog):
         TODO: update description
         https://github.com/gsamarakoon/Fun-projects-for-Python/blob/master/A%20game%20of%20BlackJack.ipynb
         """
+        # TODO: I might just delete this lol
         amt = await self.db.get_user_money(ctx.author.id, human_readable=False)
         if amount > amt:
             return await ctx.send(f"You only have `${amt}` to bet..")

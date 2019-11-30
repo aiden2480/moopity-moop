@@ -1,0 +1,35 @@
+# Todo list
+
+[ ] Make `@commands.command` the first decorator on any command
+[ ] Create better command names/aliases
+[ ] Fix up the command descriptions/docs
+[ ] Rip off the help command from https://github.com/nguuuquaaa/Belphegor/blob/master/belphegor/help.py because that was a cool help command
+[ ] Make sure all ClientSessions are referenced as `sess` not `http` because that messes up discords internal cache
+[ ] Consider storing data in `aiohttp-session-file` instead of `aiohttp-session` EncryptedCookieStorage?
+[ ] Replace All references of `Guild` with `Server` in the front-end scripts
+[ ] Make an API for voting and the like?
+[ ] Get some https://badges.io for the readme
+[ ] Create a custom `commands.Context` class inside `cogs.assets.custom`
+    [ ] Make a function to add reactions, but fails silently
+[ ] Make the readme look nicer
+[ ] Get rid of all the `\N{NAME}` stoof because they look gross tbh
+
+[ ] Clean up files
+    [ ] `cogs.assets.custom`
+    [ ] `cogs.assets.database`
+    [ ] `cogs.assets.events`
+    [ ] `cogs.assets.paginator`
+    [ ] `cogs.assets.periodic`
+    [ ] `cogs.assets.website`
+
+    [ ] `cogs.config`
+    [ ] `cogs.currency`
+    [ ] `cogs.developer`
+    [ ] `cogs.fun`
+    [ ] `cogs.general`
+    [ ] `cogs.hidden`
+        [ ] Can I just get rid of this one and put commands in `cogs.fun`?
+    [ ] `cogs.image`
+    [ ] `cogs.minecraft`
+
+    [ ] `main`

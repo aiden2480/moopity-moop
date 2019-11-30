@@ -2,11 +2,11 @@ from datetime import datetime as dt
 from datetime import timedelta as td
 from logging import FileHandler, Formatter, StreamHandler, getLogger
 from os import environ, path
-from typing import Any, List
+from typing import Any, List, Optional
 from subprocess import check_output
 
 from aiohttp import ClientSession
-from discord import Colour, Embed, Permissions, utils
+from discord import Colour, Embed, Permissions, Message, utils
 from discord.ext import commands
 
 from cogs.assets import database
@@ -78,7 +78,7 @@ class CustomBot(commands.AutoShardedBot):
         fmode = "w" if self.development else "a"
         formatter = Formatter("%(asctime)s %(levelname)s [%(name)s] %(message)s", datefmt=datefmt)
         stream = StreamHandler()
-        fileh = FileHandler(location, mode=fmode)
+        fileh = FileHandler(location, fmode, "utf-8")
         stream.setLevel(10)
         fileh.setLevel(10)
         stream.setFormatter(formatter)
@@ -130,6 +130,9 @@ class CustomBot(commands.AutoShardedBot):
 
         d = dt.utcnow() if not hide else dt.utcnow()+td(weeks=4)
         cog.__cog_settings__["loadtime"] = d
+    
+    async def get_context(self, message: Message, *, cls=None):
+        return await super().get_context(message, cls=cls or CustomContext)
 
     # Other functions
     @property
@@ -168,6 +171,21 @@ class CustomBot(commands.AutoShardedBot):
 # I'll also make a custom Cog class, for logging pruposes
 class CustomCog(commands.Cog):
     def __init__(self, cog: commands.Cog):
-        """Creates an instance of a regular cog,
-        with a few extra things I might want"""
+        """Creates an instance of a regular cog, with a few extra things I might want"""
         cog.logger = getLogger(f"bot.cogs.{cog.qualified_name.lower()}")
+
+# How about custom ctx, while we're at it
+class CustomContext(commands.Context):
+    async def react(self, msg: Optional[Message], *reactions):
+        """Add reactions to a message, absently. i.e. we don't really care if it fails.
+        If `msg` is supplied, reactions will be added to ctx.message
+        Retuns if the reaction add was successful or not"""
+        reactions = list(reactions)
+        if not isinstance(msg, Message):
+            reactions.insert(0, msg)
+            msg = self.message
+        
+        for emoji in reactions:
+            try: await msg.add_reaction(emoji)
+            except: return False
+        return True

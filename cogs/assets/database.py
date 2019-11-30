@@ -1,5 +1,5 @@
 import json_store_client as jsonstore
-from asyncio import get_event_loop
+from asyncio import get_event_loop, TimeoutError as AsyncTimeoutError
 from os import getenv
 
 from discord import Message
@@ -14,7 +14,6 @@ class Database(object):
 
     def __init__(self, url: str = getenv("DATABASE_URL")):
         self.client = jsonstore.AsyncClient(url)
-        get_event_loop().run_until_complete(self.update_cache())
 
     # Upkeep stuff
     async def update_cache(self):
@@ -175,7 +174,7 @@ class Database(object):
             If :param:guild is specified, only users from that guild will be returned.
             If :param:maxusers is specified, the return value will be a max of that
         """
-        # TODO: Make it look less like shit pls
+        # TODO: Tidy this up and refactor
         users = [int(u) for u in self.cache.get("users") if u]
         unsorted = {u:await self.get(f"users/{u}/money", 0) for u in users}
         filteredmax = sorted(unsorted, key=lambda i:-unsorted[i])

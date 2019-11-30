@@ -187,8 +187,9 @@ class Pages:
                 return True
         return False
 
-    async def paginate(self):
-        """Actually paginate the entries and run the interactive loop if necessary."""
+    async def paginate(self, msg=None):
+        """Actually paginate the entries and run the interactive loop if necessary.
+        `msg` is an optional paramater to show above the embed at the start of the session"""
         first_page = self.show_page(1, first=True)
         if not self.paginating:
             await first_page

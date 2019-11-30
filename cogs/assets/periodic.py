@@ -17,12 +17,11 @@ OFFLINE = 60 * 25
 
 class Checker(object):
     # TODO: Add a `self.history` thingo for advanced ping detection
-    # TODO: This fucks itself up when unloading the cog
+    # TODO: This breaks itself when unloading the cog
     """The object that controls all of the handling for the
     pinging of each individual server (multiple instances)"""
 
     def __init__(self, bot: commands.Bot, guildid: int, serverip: str):
-        print(f"checker init {guildid} {serverip!r}")
         self.bot = bot
         self.ip = serverip
         self.guildid = guildid
@@ -91,14 +90,14 @@ class ServerStatus(CustomCog):
         self.tasks: List[Checker] = list()
         
         self.logger.debug(f"{self.__class__.__name__!r} cog ready, loading checkers")
-        for guild in self.db.guild_server_ips.items():
-            self.create_task(int(guild[0]), guild[1])
+        for guildid, serverip in self.db.guild_server_ips.items():
+            self.create_task(int(guildid), serverip)
         self.logger.debug("Finished loading checkers")
 
     def cog_unload(self):
         """Finish & close all pingers"""
+        [task.tsk.stop() for task in self.tasks]
         self.logger.debug(f"Closed {len(self.tasks)} tasks while unloading cog {self.__class__.__name__!r}")
-        return [task.tsk.stop() for task in self.tasks]
 
     def create_task(self, guildid: int, serverip: str):
         """Creates a task"""

@@ -17,21 +17,22 @@ class General(CustomCog):
 
     @commands.command(name= "help")
     @commands.cooldown(1, 3.0)
-    @commands.bot_has_permissions(send_messages=True, embed_links=True, read_message_history=True, add_reactions=True)
+    @commands.bot_has_permissions(embed_links=True, read_message_history=True, add_reactions=True)
     async def _help(self, ctx, *, command: str = None):
         """Stop it, get some help"""
         if command is None:
             p = await HelpPaginator.from_bot(ctx)
-        else:
-            entity = self.bot.get_cog(command) or self.bot.get_command(command)
+            return await p.paginate()
 
-            if entity is None:
-                clean = command.replace("@", '@\u200b')
-                return await ctx.send(f'Command or category "{clean}" not found.')
-            elif isinstance(entity, commands.Command):
-                p = await HelpPaginator.from_command(ctx, entity)
-            else:
-                p = await HelpPaginator.from_cog(ctx, entity)
+        entity = self.bot.get_cog(command) or self.bot.get_command(command)
+        if entity is None:
+            clean = command.replace("@", "@\u200b")
+            p = await HelpPaginator.from_bot(ctx)
+            return await p.paginate(msg=f"Command or category `{clean}` not found")
+        elif isinstance(entity, commands.Command):
+            p = await HelpPaginator.from_command(ctx, entity)
+        else:
+            p = await HelpPaginator.from_cog(ctx, entity)
         await p.paginate()
 
     @commands.command()

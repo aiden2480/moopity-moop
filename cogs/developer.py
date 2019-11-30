@@ -1,5 +1,4 @@
 """Lmao literally every command in this cog is in jsk"""
-from asyncio import TimeoutError as AsyncioTimeoutError
 from datetime import datetime as dt
 from inspect import getsource, getsourcefile, getsourcelines
 from os.path import relpath

@@ -14,14 +14,5 @@ Any comment containing `FIXME` is something that I can't be bothered to fix righ
 
 `XXX` is just a glorified comment lmao. Just a flashy attention-grabber
 
-Here's the stuff I have to do
-- [x] Make sure `@commands.command` is the first decorator on any command
-- [ ] Fix whatever fuckery black did with my beautiful syntax
-- [ ] Create better command names/aliases
-- [ ] Test for the `Forbidden` error that discord throws when Moopity Moop can't speak but wants to send a message
-- [ ] Rip off the help command from https://github.com/nguuuquaaa/Belphegor/blob/master/belphegor/help.py because that was a cool help command
-- [ ] Rip off the source command from https://github.com/nguuuquaaa/Belphegor/tree/master/belphegor/help.py#L479-L512 because that was a cool source command
-- [x] Make sure all ClientSessions are referenced as `sess` not `http` because that fucks with discords internal cache
-- [ ] Consider storing data in `aiohttp-session-file` instead of `aiohttp-session` EncryptedCookieStorage?
-- [ ] Make a `log.warning` at the start of the script run that will show which commands are disabled (to re-enable/delete)
-    - m!jsk py [cmd for cmd in _bot.commands if cmd.enabled]
+# Bot features
+[![support-server](website/static/images/config.png)](https://discord.gg/AJj45Sj)

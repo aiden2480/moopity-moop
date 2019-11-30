@@ -86,10 +86,7 @@ class Events(CustomCog):
 
     @commands.Cog.listener(name="on_command")
     async def command_run_webhook(self, ctx: commands.Context):
-        # TODO: Needs to be reformatted?
-        # TODO: This still fails in a try/except loop
-        try: self.bot.cmdlogger.info(f"{ctx.author}: {ctx.message.content}")
-        except: pass # Sometimes there's a whole lotta shit in the message that the bot can't decode
+        self.bot.cmdlogger.info(f"{ctx.author}: {ctx.message.content}")
 
         webhook = Webhook.from_url(self.commands_webhook_url, adapter=AsyncWebhookAdapter(self.sess))
         e = Embed(
@@ -236,7 +233,7 @@ class DiscordBotListPosters(CustomCog):
     
     async def update_stats(self):
         """Actually updates the stats on all the DBL websites"""
-        self.logger.info("Updating bot stats on DBL websites..")
+        self.logger.debug("Updating bot stats on DBL websites..")
 
         # await self.discordBotWorldAPI()
         # await self.discordBotsGgAPI()
@@ -245,11 +242,11 @@ class DiscordBotListPosters(CustomCog):
     # Add listeners
     @commands.Cog.listener()
     async def on_guild_join(self, guild: Guild):
-        await self.on_guild_update()
+        await self.update_stats()
     
     @commands.Cog.listener()
     async def on_guild_remove(self, guild: Guild):
-        await self.on_guild_update()
+        await self.update_stats()
 
 
 def setup(bot: commands.Bot):

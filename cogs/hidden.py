@@ -14,7 +14,7 @@ class Hidden(CustomCog, command_attrs=dict(hidden=True)):
     async def cake(self, ctx):
         """Lets sit down and have some cake"""
         try:
-            await ctx.message.add_reaction("\N{SHORTCAKE}")
+            await ctx.react("\N{SHORTCAKE}")
             await ctx.send("\N{SHORTCAKE}")
         except:
             pass  # Don't really care if missing permissions

@@ -12,7 +12,7 @@ from aiohttp_jinja2 import get_env as jinja_env
 from aiohttp_jinja2 import setup as jinja_setup
 from aiohttp_session import setup as session_setup
 from aiohttp_session.cookie_storage import EncryptedCookieStorage
-from discord import Activity, AsyncWebhookAdapter, Colour, Embed
+from discord import Activity, AsyncWebhookAdapter, Colour, Embed, Forbidden
 from discord import Game, HTTPException, Message, Status, Webhook
 from discord.ext import commands
 from humanize import naturaltime
@@ -64,7 +64,6 @@ async def on_ready():
     bot.database_ready = True
     bot.logger.info("Database ready")
     bot.load_extension("cogs.assets.periodic")
-    bot.logger.debug("Loaded periodic cog")
 
     # Update env on site
     env = jinja_env(site)
@@ -99,7 +98,7 @@ async def on_ready():
 
 @bot.event
 async def on_connect():
-    bot.logger.debug(f"Bot reconnected at {dt.now():%H:%M:%S}")
+    bot.logger.info(f"Bot reconnected at {dt.now():%H:%M:%S}")
     await bot.change_presence(
         status=Status.online,
         afk=False,
@@ -112,7 +111,7 @@ async def on_connect():
 
 @bot.event
 async def on_disconnect():
-    bot.logger.debug(f"Bot disconnected at {dt.now():%H:%M:%S}")
+    bot.logger.info(f"Bot disconnected at {dt.now():%H:%M:%S}")
 
 
 @bot.event
@@ -121,7 +120,7 @@ async def on_message(m: Message):
         return
 
     # Process commands
-    #await bot.wait_until_ready()
+    await bot.wait_until_ready()
     await bot.process_commands(m)
 
     # Just in case some idiot managed to lose the prefix
@@ -135,10 +134,14 @@ async def on_message(m: Message):
 
 @bot.event
 async def on_command_error(ctx: commands.Context, error):
+    # TODO: Cleanup this and make it look a bit nicer
     """Bot error handler"""
 
     if getattr(ctx, "error_handled", False):
         return  # Check if error already handled
+
+    # Find the actual error, if it is a `CommandInvokeError`
+    error = getattr(error, "original", error)
 
     # Setup response embed
     aidzman = bot.get_user(bot.owner_id)
@@ -158,7 +161,8 @@ async def on_command_error(ctx: commands.Context, error):
     if isinstance(error, ignored_errors):
         pass
     elif isinstance(error, param_errors):
-        e.title, e.description = "Incorrect use of command", str(error)
+        e.title = "Incorrect use of command"
+        e.description = str(error)
         e.add_field(
             name="The correct usage is",
             value=f"```{ctx.prefix}{ctx.command} {ctx.command.signature}```",
@@ -171,9 +175,12 @@ async def on_command_error(ctx: commands.Context, error):
             e.description = "Bypassing disable.."
             msg = await ctx.send(embed=e)
 
-            # TODO: This doesn't pass args
             ctx.command.enabled = True
-            await ctx.invoke(ctx.command)
+            try:
+                await ctx.reinvoke()
+            except Exception as err:
+                await ctx.send(f"```py\n{err.__class__.__name__}: {err}```")
+                raise
             ctx.command.enabled = False
 
             e.description += " Done\nRe-disabling command"
@@ -184,60 +191,51 @@ async def on_command_error(ctx: commands.Context, error):
             e.description = "This command has been disabled. Please wait while it is being fixed \N{HAMMER AND WRENCH}"
             await ctx.send(embed=e)
     elif isinstance(error, commands.NoPrivateMessage):
-        e.title, e.description = (
-            "Error while performing command",
-            "This command cannot be used in DM",
-        )
+        e.title = "Error while performing command"
+        e.description = "This command cannot be used in a DM",
         await ctx.send(embed=e)
     elif isinstance(error, commands.CommandOnCooldown):
         e.title = "This command is on cooldown!"
-        e.description = "Please try again in "+naturaltime(dt.now()+td(seconds=error.retry_after), future=True)
+        e.description = f"Please try again in {naturaltime(dt.now()+td(seconds=error.retry_after), future=True)}"
         await ctx.send(embed=e)
     elif isinstance(error, commands.MissingPermissions):
-        perms = [f"`{p.replace('_', ' ').capitalize()}`" for p in error.missing_perms]
+        perms = [perm.replace("_", " ").replace("guild", "server").title() for perm in error.missing_perms]
         e.title = "You're missing permissions!"
         e.description = f"You can't run this command :angry: Come back when you have the following permissions:\n{', '.join(perms)}"
         await ctx.send(embed=e)
     elif isinstance(error, commands.BotMissingPermissions):
-        if "send_messages" in error.missing_perms:
-            return  # Can't send a message saying the bot can't send messages ;(
-        perms = [f"`{p.replace('_', ' ').capitalize()}`" for p in error.missing_perms]
+        perms = [perm.replace("_", " ").replace("guild", "server").title() for perm in error.missing_perms]
         e.title = "I'm missing permissions!"
         e.description = f"I need the following permissions to execute this command:\n{', '.join(perms)}"
-        await ctx.send(embed=e)
+        
+        try: await ctx.send(embed=e)
+        except Forbidden: # Can't send embeds
+            try: await ctx.send(e.description) # Can't send messages
+            except: await ctx.react("\N{DOUBLE EXCLAMATION MARK}")
 
     # Other errors
-    elif isinstance(error.original, HTTPException) and (
-        "or fewer in length" in str(error.original)
-    ):
-        # TODO: This needs to be fixed
-        e.title, e.description = (
-            "Error executing command",
-            "Too many characters to send reply \N{SHRUG}",
-        )
-        await ctx.send(embed=e)
+    elif isinstance(error, HTTPException):
+        if error.status == 400 and "fewer in length" in error.text.lower():
+            e.title = "Error executing command"
+            e.description = "Too many characters to send reply \N{SHRUG}"
+            await ctx.send(embed=e)
     else:
-        format_error = lambda error: "\n".join(format_exception(type(error), error, error.__traceback__, 10))
-        error_code = f"`{error.original.__class__.__name__}//{int(time())}`"
-        hashtag = "#" if ctx.guild else ""
-        bot.logger.error(format_error(error))
-        # I know, it really is the best way to document errors ;)
+        formatted = "\n".join(format_exception(type(error), error, error.__traceback__, 10))
+        error_code = f"`{error.__class__.__name__}//{int(time())}`"
+        bot.logger.error(formatted)
 
-        e.color, e.description = (0xFB8F02, f"```py\n{format_error(error.original)}```")
+        e.color = 0xFB8F02
+        e.description = f"```py\n{formatted}```"
         e.set_author(name="An error occoured", icon_url="https://bit.ly/2JHJ91I")
         e.add_field(name="User", value=f"{ctx.author}\n{ctx.author.id}")
         e.add_field(name="Error code", value=error_code)
-
-        if ctx.guild:
-            e.add_field(name="Guild", value=ctx.guild.name)
-        e.add_field(name="Channel", value=f"{hashtag}{ctx.channel}")
+        e.add_field(name="Guild", value=ctx.guild.name) if ctx.guild else None
+        e.add_field(name="Channel", value=f"{'#' if ctx.guild else ''}{ctx.channel}")
 
         if ctx.author == aidzman:
             return await ctx.send(embed=e)
 
-        webhook = Webhook.from_url(
-            bot.env["ERROR_WEBHOOK_URL"], adapter=AsyncWebhookAdapter(bot.session)
-        )
+        webhook = Webhook.from_url(bot.env["ERROR_WEBHOOK_URL"], adapter=AsyncWebhookAdapter(bot.session))
         await webhook.send(
             embed=e, username=bot.user.name,
             avatar_url=bot.user.avatar_url
@@ -305,5 +303,5 @@ if __name__ == "__main__":
         bot.logger.info("Stopping script with exit code 0")
 
     # Close up from website
-    site.logger.info("Closing asyncio loop")
+    site.logger.debug("Closing asyncio loop")
     loop.close()

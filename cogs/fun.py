@@ -1,4 +1,4 @@
-from asyncio import TimeoutError as AsyncioTimeoutError
+from asyncio import TimeoutError as AsyncTimeoutError
 from datetime import datetime as dt
 from datetime import timedelta as td
 from html import unescape
@@ -28,6 +28,7 @@ class Fun(CustomCog):
 
     @commands.group(name="akinator", aliases=["aki"])
     @commands.cooldown(2, 60, commands.BucketType.user)
+    @commands.bot_has_permissions(add_reactions=True)
     async def akinator_cmd(self, ctx):
         """A classic game of Akinator!"""
         if ctx.invoked_subcommand:
@@ -163,6 +164,7 @@ class Fun(CustomCog):
 
     @commands.command()
     @commands.cooldown(1, 6, commands.BucketType.user)
+    @commands.bot_has_permissions(add_reactions=True)
     async def trivia(self, ctx: commands.Context, difficulty="random"):
         """Gives you some random trivia.\n
         Harder trivia is worth more coins and easier is worth less
@@ -170,7 +172,6 @@ class Fun(CustomCog):
         `easy`, `medium`, or `hard` in to the command paramenters
         and you will recieve that level difficulty trivia.
         """
-        # TODO: Add a thingo for making sure the bot has perms to add reactions
         # TODO: Do I need to change the amount of money per correct answer?
         # TODO: Try to make this a bit neater lol
         await ctx.trigger_typing()
@@ -205,16 +206,16 @@ class Fun(CustomCog):
         try:
             chk = lambda reaction, user: user == ctx.author and str(reaction.emoji) in reactions
             reaction, user = await self.bot.wait_for("reaction_add", check=chk, timeout=15)
-        except AsyncioTimeoutError:
-            await message.add_reaction("\N{STOPWATCH}")
+        except AsyncTimeoutError:
+            await ctx.react(message, "\N{STOPWATCH}")
             return await ctx.send("\N{STOPWATCH} wtf you didn't answer in time???")
 
         if str(reaction.emoji) == correct_emoji:
-            await message.add_reaction("\N{PARTY POPPER}")
+            await ctx.react(message, "\N{PARTY POPPER}")
             await ctx.send(f"\N{PARTY POPPER} Correct, big brain! You earned yourself `{worth}` coins!")
             await self.db.add_user_money(ctx.author.id, worth)
         else:
-            await message.add_reaction("\N{CONFUSED FACE}")
+            await ctx.react(message, "\N{CONFUSED FACE}")
             await ctx.send(f"\N{CONFUSED FACE} Wow such small brain. The correct answer was {correct_emoji} `{unescape(question['correct_answer'])}`")
 
     @commands.command(aliases=["zalgo"])
