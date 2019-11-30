@@ -23,7 +23,7 @@ class Config(CustomCog):
         # TODO: Make the pingo thing for the server
         emojis = self.bot.emoji
         e = self.bot.EmptyEmbed(
-            title=f"Server config settings for **{ctx.guild}** \N{GEAR}",
+            title=f"Server config settings for **{ctx.guild}** ⚙",
             set_footer=False,
             set_timestamp=False,
         )
@@ -40,7 +40,7 @@ class Config(CustomCog):
         e.description += f"\nTip: you can also change these settings on the [bot website]({self.bot.website_url}/guildsettings/{ctx.guild.id})\n"
         
         e.add_field(name=f"Bot Prefix {emojis.craftingtable}", value=f"`{prfx}`" if prfx else None)
-        e.add_field(name=f"Minecraft Role \N{LARGE ORANGE DIAMOND}", value=role.mention if role else None)
+        e.add_field(name=f"Minecraft Role 🔶", value=role.mention if role else None)
         e.add_field(name=f"Minecraft Server {emojis.goldenapple}", value=f"`{server}`" if server else server)
         e.set_footer(text="Only users with 'Manage Server' permissions can change these settings", icon_url=self.bot.user.avatar_url)
         await ctx.send(embed=e)
@@ -59,7 +59,7 @@ class Config(CustomCog):
         if prefix == None:
             prfx = await self.db.get_guild_prefix(ctx.guild.id) or self.bot.default_prefix
 
-            embed.description = f'Hello **{ctx.author}** \N{WAVING HAND SIGN} My prefix here is **`{prfx}`**\n\nUse `{ctx.prefix}{ctx.command.name} <prefix>` to set the prefix or `{ctx.prefix}{ctx.command.name} ""` to reset it the the default'
+            embed.description = f'Hello **{ctx.author}** 👋 My prefix here is **`{prfx}`**\n\nUse `{ctx.prefix}{ctx.command.name} <prefix>` to set the prefix or `{ctx.prefix}{ctx.command.name} ""` to reset it the the default'
             return await ctx.send(embed=embed)
 
         if prefix in ["", self.bot.default_prefix]:
@@ -133,11 +133,11 @@ class Config(CustomCog):
 
         if not isinstance(role, Role):
             # Needs to be `Role` object from now on
-            embed.description = f"Role {role!r} not found \N{CONFUSED FACE}"
+            embed.description = f"Role {role!r} not found 😕"
             return await ctx.send(embed=embed)
 
         if role > ctx.guild.me.top_role:
-            embed.description = f"The role {role.mention} is higher than my top role. Please lower the role in the server settings hierarchy or raise mine :sunglasses:"
+            embed.description = f"The role {role.mention} is higher than my top role. Please lower the role in the server settings hierarchy or raise mine 😎"
             return await ctx.send(embed=embed)
 
         if role.managed:

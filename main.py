@@ -129,7 +129,7 @@ async def on_message(m: Message):
         if m.content.strip() == ctx.guild.me.mention:
             await ctx.trigger_typing()
             prfx = await bot.db.get_guild_prefix(m.guild.id) or bot.default_prefix
-            await ctx.send(f"Hello **{ctx.author}** \N{WAVING HAND SIGN} My prefix in this server is `{prfx}`")
+            await ctx.send(f"Hello **{ctx.author}** 👋 My prefix in this server is `{prfx}`")
 
 
 @bot.event
@@ -188,7 +188,7 @@ async def on_command_error(ctx: commands.Context, error):
         else:
             e.timestamp = dt.utcnow()
             e.set_footer(text=f"Run by {ctx.author}", icon_url=ctx.author.avatar_url)
-            e.description = "This command has been disabled. Please wait while it is being fixed \N{HAMMER AND WRENCH}"
+            e.description = "This command has been disabled. Please wait while it is being fixed 🛠"
             await ctx.send(embed=e)
     elif isinstance(error, commands.NoPrivateMessage):
         e.title = "Error while performing command"
@@ -211,13 +211,13 @@ async def on_command_error(ctx: commands.Context, error):
         try: await ctx.send(embed=e)
         except Forbidden: # Can't send embeds
             try: await ctx.send(e.description) # Can't send messages
-            except: await ctx.react("\N{DOUBLE EXCLAMATION MARK}")
+            except: await ctx.react("‼")
 
     # Other errors
     elif isinstance(error, HTTPException):
         if error.status == 400 and "fewer in length" in error.text.lower():
             e.title = "Error executing command"
-            e.description = "Too many characters to send reply \N{SHRUG}"
+            e.description = "Too many characters to send reply 🤷"
             await ctx.send(embed=e)
     else:
         formatted = "\n".join(format_exception(type(error), error, error.__traceback__, 10))

@@ -7,8 +7,8 @@ from discord.ext import commands
 jsonstore.DEFAULT_TIMEOUT_SECONDS = 15
 
 class Database(object):
-    LEADERBOARD_EMOJI_KEY = {1: "\N{CROWN}", 2: "\N{TRIDENT EMBLEM}", 3: "\N{TROPHY}"}
-    LEADERBOARD_DEFAULT_EMOJI = "\N{REMINDER RIBBON}"
+    LEADERBOARD_EMOJI_KEY = {1: "👑", 2: "🔱", 3: "🏆"}
+    LEADERBOARD_DEFAULT_EMOJI = "🎗"
     LEADERBOARD_URL_KEY = {1:"98fe9cdec2bf8ded782a7bf1e302b664", 2:"7d7c9561cc5ab5259ff8023b8ef86c99", 3:"0a00e865c445d42dfb9f64bedfab8cf8"}
     LEADERBOARD_DEFAULT_URL = "d702f2335a85d421e708bc9466571fa8"
 

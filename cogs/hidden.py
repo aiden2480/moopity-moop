@@ -1,4 +1,3 @@
-from discord import Colour, Embed, Game
 from discord.ext import commands
 from cogs.assets.custom import CustomCog
 
@@ -10,14 +9,13 @@ class Hidden(CustomCog, command_attrs=dict(hidden=True)):
         super().__init__(self)
         self.bot = bot
 
-    @commands.command(aliases=["\N{SHORTCAKE}"])
+    @commands.command(aliases=["🍰"])
     async def cake(self, ctx):
         """Lets sit down and have some cake"""
         try:
-            await ctx.react("\N{SHORTCAKE}")
-            await ctx.send("\N{SHORTCAKE}")
-        except:
-            pass  # Don't really care if missing permissions
+            await ctx.react("🍰")
+            await ctx.send("🍰")
+        except: pass # Don't really care if missing permissions
 
 
 def setup(bot: commands.Bot):

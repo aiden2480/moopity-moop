@@ -12,7 +12,10 @@
 [ ] Create a custom `commands.Context` class inside `cogs.assets.custom`
     [ ] Make a function to add reactions, but fails silently
 [ ] Make the readme look nicer
-[ ] Get rid of all the `\N{NAME}` stoof because they look gross tbh
+[ ] Open invite URL in new window
+    [ ] https://stackoverflow.com/questions/22444356/html-open-link-in-new-fixed-size-window
+[x] Get rid of all the `\N{NAME}` stoof because they look gross tbh
+[ ] Delete `EmptyEmbed`, I don't use it anyway
 
 [ ] Clean up files
     [ ] `cogs.assets.custom`

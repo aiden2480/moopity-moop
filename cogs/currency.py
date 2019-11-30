@@ -31,14 +31,14 @@ class Currency(CustomCog):
         """Shows who has the most amount of money in this server"""
         embed = Embed(colour=Colour.blue(), description="")
         if ctx.guild is None:
-            embed.description=f"\N{TRIDENT EMBLEM} [Online global leaderboard]({self.bot.website_url}/leaderboard)"
+            embed.description=f"🔱 [Online global leaderboard]({self.bot.website_url}/leaderboard)"
             embed.set_author(name="Global bot leaderboard", icon_url=self.bot.user.avatar_url)
             return await ctx.send(embed=embed)
 
         embed.title = "The richest users in this server"
         lbdata = await self.db.get_leaderboard(ctx.guild, maxusers=10)
         if not lbdata:
-            embed.description += "It seems that literally everyone in this server is broke \N{SHRUG}\n"
+            embed.description += "It seems that literally everyone in this server is broke 🤷\n"
             embed.description += f"Use {ctx.prefix}daily to get started"
         
         for id_, money in lbdata.items():
@@ -99,9 +99,9 @@ class Currency(CustomCog):
         if victim == ctx.author:
             return await ctx.send("Congratulations, you played yourself")
         if victim.bot and victim != ctx.guild.me:
-            return await ctx.send(f"Uh oh, you can't steal from bots! \N{ROBOT FACE} ~~||except me||~~")
+            return await ctx.send(f"Uh oh, you can't steal from bots! 🤖 ~~||except me||~~")
         if you < 75:
-            return await ctx.send(f"You must have at least `$75` to steal from someone. You still need another `${75-you}` \N{SHRUG}")
+            return await ctx.send(f"You must have at least `$75` to steal from someone. You still need another `${75-you}` 🤷")
         if vtm < 75 and victim != ctx.guild.me:
             return await ctx.send(f"Not worth it, **{victim}** only has `${vtm}`")
         if victim == ctx.guild.me:
@@ -114,7 +114,7 @@ class Currency(CustomCog):
 
             await ctx.send(f"Wow congrats **{ctx.author}**! You managed to steal `${amount}` from **{victim}**")
             try: await victim.send(
-                    f"Massive 🇫 {ctx.author.mention} just stole `${amount}` from you in `{ctx.guild}` \N{CONFUSED FACE}"
+                    f"Massive 🇫 {ctx.author.mention} just stole `${amount}` from you in `{ctx.guild}` 😕"
                 )
             except: pass
         else:
@@ -139,7 +139,7 @@ class Currency(CustomCog):
         if call not in ["heads", "tails"]:
             return await ctx.send("You need to call either `heads` or `tails`. It's that obvious")
         if call != esp:
-            await ctx.send(f"massive 🇫 It was `{esp}` and you picked `{call}` \N{MONEY BAG} Waste of a coin lmao")
+            await ctx.send(f"massive 🇫 It was `{esp}` and you picked `{call}` 💰 Waste of a coin lmao")
             return await self.db.add_user_money(ctx.author.id, -1)
         await ctx.send(f"Congrats you have ESP. As a result, you were rewarded with `$1`")
         await self.db.add_user_money(ctx.author.id, 1)

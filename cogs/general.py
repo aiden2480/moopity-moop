@@ -71,18 +71,18 @@ class General(CustomCog):
             infoo += f"\n{i}"
 
         fields = {
-            "Developer \N{PERSONAL COMPUTER}": f"{aidzman}\n{aidzman.id}",
-            "Version \N{HAMMER AND WRENCH}": f"Bot version `{self.bot.VERSION}`\nDiscord.py `v{dpy_version}`",
-            "Commands \N{SHORTCAKE}": len(global_commands),
-            "Guild count \N{SHIELD}": len(self.bot.guilds),
-            "User count \N{BUSTS IN SILHOUETTE}": len(self.bot.users),
-            "Ping \N{TABLE TENNIS PADDLE AND BALL}": f"{round(self.bot.latency * 1000, 2)}ms",
+            "Developer 💻": f"{aidzman}\n{aidzman.id}",
+            "Version 🛠": f"Bot version `{self.bot.VERSION}`\nDiscord.py `v{dpy_version}`",
+            "Commands 🍰": len(global_commands),
+            "Guild count 🛡": len(self.bot.guilds),
+            "User count 👥": len(self.bot.users),
+            "Ping 🏓": f"{round(self.bot.latency * 1000, 2)}ms",
         }
 
         e.add_field(name="Last updates", value=infoo, inline=False)
         for field in fields:
             e.add_field(name=field, value=fields[field])
-        e.add_field(name="Uptime \N{ROBOT FACE}", value=self.bot.get_uptime(), inline=False)
+        e.add_field(name="Uptime 🤖", value=self.bot.get_uptime(), inline=False)
         e.set_author(name=self.bot.user, icon_url=self.bot.user.avatar_url)
         await ctx.send(embed=e)
 
@@ -113,7 +113,7 @@ class General(CustomCog):
         """Shows how long the bot has been online"""
         await ctx.send(embed=Embed(
             colour=Colour.blue(),
-            description=f"I have been online for `{self.bot.get_uptime()}` \N{ROBOT FACE}",
+            description=f"I have been online for `{self.bot.get_uptime()}` 🤖",
         ))
 
 

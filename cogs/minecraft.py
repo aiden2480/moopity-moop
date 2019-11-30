@@ -8,11 +8,6 @@ from discord.ext import commands
 from humanize import naturaltime
 from cogs.assets.custom import CustomCog
 
-MINECRAFT_STATUS_EMOJI = dict(
-    green="\N{WHITE HEAVY CHECK MARK}",
-    yellow="\N{WARNING SIGN}",
-    red="\N{NO ENTRY}",
-)
 
 class Minecraft(CustomCog):
     """Commands for Minecraft"""
@@ -136,7 +131,7 @@ class Minecraft(CustomCog):
         )
         
         for server, status in sts.items():
-            e.description += f"{MINECRAFT_STATUS_EMOJI[status]} **{server}**\n"
+            e.description += f"{dict(green='✅', yellow='⚠', red='⛔')[status]} **{server}**\n"
         e.set_footer(text=f"Stats retrieved in {round((time()-start)*1000)}ms")
         await ctx.send(embed=e)
 
@@ -167,13 +162,13 @@ class Minecraft(CustomCog):
 
         if query["success"] != True or query["player"] == None:
             e.colour = Colour.red()
-            e.description = "Player stats could not be retrieved \N{SHRUG}"
+            e.description = "Player stats could not be retrieved 🤷"
             e.set_footer(text=self.bot.user, icon_url=self.bot.user.avatar_url)
             return await msg.edit(embed=e)
 
         if not query["player"].get("lastLogin"):
             e.colour =  Colour.orange()
-            e.description = f"User `{user}` has never logged into `mc.hypixel.net` \N{SHRUG}"
+            e.description = f"User `{user}` has never logged into `mc.hypixel.net` 🤷"
             return await msg.edit(embed=e)
 
         stats = query["player"]
@@ -246,7 +241,7 @@ class Minecraft(CustomCog):
         async with self.sess.get(f"http://api.hivemc.com/v1/player/{user}") as resp:
             if resp.status == 404:
                 e.colour = Colour.red()
-                e.description = "Player stats could not be retrieved \N{SHRUG}"
+                e.description = "Player stats could not be retrieved 🤷"
                 e.set_footer(text=self.bot.user, icon_url=self.bot.user.avatar_url)
                 return await msg.edit(embed=e)
             query = await resp.json()
@@ -305,7 +300,7 @@ class Minecraft(CustomCog):
         async with self.sess.get("http://api.hivemc.com/v1/server/uniquecount") as resp:
             uplayercount = (await resp.json())["count"]
 
-        e.title = "The Hive stats \N{HONEYBEE}"
+        e.title = "The Hive stats 🐝"
         e.description = f"**Current player count**: `{playercount}`\n**Unique player count**: `{uplayercount}`"
         e.set_thumbnail(url="https://api.minetools.eu/favicon/play.hivemc.com")
         e.set_footer(text=f"Information gathered in {round((time()- start)*1000)}ms", icon_url=self.bot.user.avatar_url)

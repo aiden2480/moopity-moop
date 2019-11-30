@@ -136,31 +136,11 @@ class Fun(CustomCog):
         ctx.error_handled = True
         return
 
-        if isinstance(error, (CommandInvokeError)):
+        if isinstance(error, commands.CommandInvokeError):
             await ctx.send("An error occoured while running this command")
         else:
             return
         ctx.error_handled = True
-
-    @commands.command()
-    @commands.cooldown(3, 60, commands.BucketType.user)
-    async def thank(self, ctx):
-        """Thank the bus driver
-        Totally not a useless command lmao"""
-        self.busdriverthanks += 1
-
-        s = "s" if self.busdriverthanks != 1 else ""
-        await ctx.send(
-            f"The bus driver has been thanked {self.busdriverthanks} time{s}! \N{MINIBUS}"
-        )
-
-    @thank.error
-    async def thank_error_handler(self, ctx, error):
-        if isinstance(error, commands.CommandOnCooldown):
-            ctx.error_handled = True
-            await ctx.send(
-                f"You can't thank the bus driver yet!\nYou need to wait another `{round(error.retry_after)}` seconds! \N{ONCOMING BUS}"
-            )
 
     @commands.command()
     @commands.cooldown(1, 6, commands.BucketType.user)
@@ -207,28 +187,26 @@ class Fun(CustomCog):
             chk = lambda reaction, user: user == ctx.author and str(reaction.emoji) in reactions
             reaction, user = await self.bot.wait_for("reaction_add", check=chk, timeout=15)
         except AsyncTimeoutError:
-            await ctx.react(message, "\N{STOPWATCH}")
-            return await ctx.send("\N{STOPWATCH} wtf you didn't answer in time???")
+            await ctx.react(message, "⏱")
+            return await ctx.send("⏱ wtf you didn't answer in time???")
 
         if str(reaction.emoji) == correct_emoji:
-            await ctx.react(message, "\N{PARTY POPPER}")
-            await ctx.send(f"\N{PARTY POPPER} Correct, big brain! You earned yourself `{worth}` coins!")
+            await ctx.react(message, "🎉")
+            await ctx.send(f"🎉 Correct, big brain! You earned yourself `{worth}` coins!")
             await self.db.add_user_money(ctx.author.id, worth)
         else:
-            await ctx.react(message, "\N{CONFUSED FACE}")
-            await ctx.send(f"\N{CONFUSED FACE} Wow such small brain. The correct answer was {correct_emoji} `{unescape(question['correct_answer'])}`")
+            await ctx.react(message, "😕")
+            await ctx.send(f"😕 Wow such small brain. The correct answer was {correct_emoji} `{unescape(question['correct_answer'])}`")
 
     @commands.command(aliases=["zalgo"])
     async def glitch(self, ctx, *, data: str):
         """Generate Zalgo text"""
-        # TODO: Apparently the `len` function is broken idk
-        # TODO: Use commands.Greedy to set weight
         zalgo = "".join((c+"".join((choice(GLITCH_ALL) for i in range(20))) for c in data))
         txt = f"Generated `{len(zalgo)}` characters of zalgo\n\n{zalgo}"
         if len(txt) <= 2000:
             return await ctx.send(txt)
-        fil=File(BytesIO(zalgo.encode("utf-8")), filename="zalgo.txt")
-        await ctx.send(f"I generated `{len(zalgo)}` characters of zalgo but couldn't send it because of Discord's limitations, here it is \N{DOWNWARDS BLACK ARROW}", file=fil)
+        file=File(BytesIO(zalgo.encode("utf-8")), filename="zalgo.txt")
+        await ctx.send(f"I generated `{len(zalgo)}` characters of zalgo, here it is ⬇", file=file)
 
 
 def setup(bot: commands.Bot):
