@@ -1,4 +1,5 @@
-# Moopity Moop
+Moopity Moop
+============
 [![support-server](https://img.shields.io/discord/496081601755611137?color=%233498DB&label=support%20server&style=flat-square)](https://discord.gg/AJj45Sj)
 [![updates](https://img.shields.io/github/last-commit/aiden2480/moopity-moop?color=%233498DB&label=last%20update&style=flat-square)](https://github.com/aiden2480/moopity-moop)
 [![stargazers](https://img.shields.io/github/stars/aiden2480/moopity-moop?color=%233498DB&label=stargazers&style=flat-square)](https://github.com/aiden2480/moopity-moop/stargazers)
@@ -10,7 +11,8 @@ Moopity Moop is a feature rich bot with commands for Minecraft such as:
  - Find stats on popular servers such as Hypixel, or the Hive!
  - Server MOTD checks and more!
  
-## Features
+Features
+--------
 [![Invite now!](website/static/images/config.png)](https://moopity-moop.chocolatejade42.repl.co/invite)
 
 *A customisable prefix, a role automatically given to users when they start playing Minecraft, and a server IP for automatic pinging, which the bot then sets its nickname to*

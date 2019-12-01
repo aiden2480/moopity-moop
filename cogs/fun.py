@@ -4,6 +4,7 @@ from datetime import timedelta as td
 from html import unescape
 from io import BytesIO
 from random import choice, randint, shuffle
+from time import perf_counter
 
 from akinator import CantGoBackAnyFurther
 from akinator.async_aki import Akinator
@@ -207,6 +208,40 @@ class Fun(CustomCog):
             return await ctx.send(txt)
         file=File(BytesIO(zalgo.encode("utf-8")), filename="zalgo.txt")
         await ctx.send(f"I generated `{len(zalgo)}` characters of zalgo, here it is ⬇", file=file)
+    
+    @commands.command(name="10s")
+    @commands.bot_has_permissions(add_reactions=True)
+    @commands.cooldown(5, 60, commands.BucketType.user)
+    async def ten_secs(self, ctx):
+        """React to the message as close to 10 seconds as you can and win coins!"""
+        emoji = str(choice(ctx.guild.emojis+(self.bot.emoji.minecraft,)))
+        embed = Embed(description=f"React to this message with {emoji} after exactly 10 seconds", colour=Colour.blue())
+        embed.set_author(icon_url=ctx.author.avatar_url, name=f"{ctx.author}'s 10s game")
+        msg = await ctx.send(embed=embed)
+        start = perf_counter()
+        await msg.add_reaction(emoji)
+
+        def check(reaction, user):
+            return user == ctx.author and str(reaction.emoji) == str(emoji)
+        
+        try: reaction, user = await self.bot.wait_for("reaction_add", check=check, timeout=20)
+        except AsyncTimeoutError:
+            embed.description = "Timed out after 20 seconds 😕"
+            return await msg.edit(embed=embed)
+        
+        end = perf_counter()-start
+        diff = abs(10-end)
+        coins = {0:4, 1:2, 2:1}.get(round(diff), 0)
+        endstr = f"{end:.1f}" if len(str(round(end))) == 2 else f"{end:.2f}"
+        embed.description = "\n".join(i.strip() for i in f"""```md
+            \u200b      Results
+            ====================
+            < time   = "{endstr}s" >
+            < off by = "{diff:.2f}s" >
+            < coins  = "{coins} net" >
+        ```""".splitlines())
+        await msg.edit(embed=embed)
+        await self.db.add_user_money(ctx.author.id, coins)
 
 
 def setup(bot: commands.Bot):

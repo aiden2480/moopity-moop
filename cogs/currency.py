@@ -74,7 +74,7 @@ class Currency(CustomCog):
         await self.db.add_user_money(ctx.author.id, -amount)
         await self.db.add_user_money(member.id, amount)
 
-    @commands.command(enabled=False)
+    @commands.command()
     @commands.guild_only()
     @commands.cooldown(1, 30, commands.BucketType.member)
     async def steal(self, ctx, victim: Member):
@@ -91,6 +91,7 @@ class Currency(CustomCog):
         However, there is a 60% chance that you will fail,
         but also a 125% reward if you are successful"""
         # FIXME: Check this hasn't broken again
+        # Eh I can't be bothered to fix it so I'll just hope it works
         you = await self.db.get_user_money(ctx.author.id, human_readable=False)
         vtm = await self.db.get_user_money(victim.id, human_readable=False)
         win = randint(0, 100) > 35

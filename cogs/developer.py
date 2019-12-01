@@ -4,7 +4,7 @@ from inspect import getsource, getsourcefile, getsourcelines
 from os.path import relpath
 from time import time
 
-from discord import Colour, Embed, Member
+from discord import Colour, Embed, Member, User
 from discord.ext import commands
 from cogs.assets.custom import CustomCog
 
@@ -88,6 +88,20 @@ class Developer(CustomCog):
         location = relpath(filename).replace("\\", "/")
         final_url = f"{source_url}/blob/master/{location}#L{firstlineno}-L{firstlineno+len(lines)-1}"
         await ctx.send(final_url)
+    
+    @commands.command()
+    @commands.is_owner()
+    async def reset(self, ctx, mbr: commands.Greedy[User]=None, *commands):
+        """Reset cooldowns"""
+        mbr = [ctx.author] or mbr
+        con = ctx
+        cmds = [self.bot.get_command(cmd) for cmd in commands if cmd] if commands else self.bot.commands
+        for cmd in cmds:
+            for m in mbr:
+                con.author = m
+                cmd.reset_cooldown(con)
+        await ctx.send("Done")
+
 
 
 def setup(bot: commands.Bot):
