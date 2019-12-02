@@ -20,7 +20,7 @@ class Config(CustomCog):
         # TODO: You only need admin permissions to change the prefix lmao not view it
         """Get the config data for this server"""
         emojis = self.bot.emoji
-        e = Embed(title=f"Server config settings for **{ctx.guild}** ⚙", colour=Colour.blue())
+        e = Embed(title=f"Server config settings for **{ctx.guild}** ⚙", colour=Colour.blue(), description="")
 
         prfx = await self.db.get_guild_prefix(ctx.guild.id)
         server = await self.db.get_minecraft_server(ctx.guild.id)
@@ -48,7 +48,7 @@ class Config(CustomCog):
         If prefix option is set to `""`, the prefix is returned to default.
         You must have `Manage Guild` permissions to use this command.
         """
-        embed = Embed(colour=Colour.blue(), timestamp=ctx.message.created_at)
+        embed = Embed(colour=Colour.blue(), timestamp=ctx.message.created_at, description="")
         embed.set_footer(text=self.bot.user, icon_url=self.bot.user.avatar_url)
 
         if prefix == None:
