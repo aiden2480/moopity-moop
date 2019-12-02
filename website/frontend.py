@@ -288,7 +288,3 @@ def get_avatar(user_info: dict = {}):
         except KeyError:
             pass
     return "https://cdn.discordapp.com/embed/avatars/0.png"
-
-def get_role_colour(role) -> str:
-    """Returns the HEX code of the Role"""
-    

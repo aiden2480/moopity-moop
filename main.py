@@ -22,9 +22,8 @@ from logging import getLogger
 
 from cogs.assets.custom import CustomBot
 from cogs.assets.database import get_prefix as prefix
-from cogs.assets.website import OAUTH_SCOPE, middlewares
-from cogs.assets.website import routes as web_routes
-from cogs.assets.website import web_get_cmd_data
+from website.frontend import middlewares, routes as frontend_routes, web_get_cmd_data
+from website.api import routes as backend_routes
 
 # Create bot
 bot = CustomBot(
@@ -79,7 +78,7 @@ async def on_ready():
         "client_id": bot.user.id,
         "redirect_uri": bot.oauth_callback,
         "response_type": "code",
-        "scope": OAUTH_SCOPE,
+        "scope": "identify guilds",
     })
 
     # Announce our presence to the whole wide world
@@ -277,7 +276,8 @@ if __name__ == "__main__":
     [bot.logger.warning(f"Disabled command `{cmd!s}` found in cog `{cmd.cog.qualified_name}`") for cmd in bot.walk_commands() if not cmd.enabled]
 
     # Setup the website
-    site.add_routes(web_routes)
+    site.add_routes(frontend_routes)
+    site.add_routes(backend_routes)
     site.router.add_static("/static", "./website/static")
     site.on_startup.append(web_get_cmd_data)
     env = jinja_env(site)

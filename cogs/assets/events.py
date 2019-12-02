@@ -137,7 +137,6 @@ class Events(CustomCog):
 
     @commands.Cog.listener(name="on_guild_role_delete")
     async def check_minecraft_role_deleted(self, role: Role):
-        # TODO: Maybe make a logger for `events`? (`guild` can fall under it)
         if str(role.id) in self.db.guild_minecraft_roles.values():
             await self.db.set_minecraft_role(role.guild.id, None)
             self.logger.debug(f"Deleted the minecraft role for {role.guild.id} ({role.id})")
@@ -231,24 +230,27 @@ class DiscordBotListPosters(CustomCog):
         self.bot = bot
         self.sess = bot.session
     
-    async def update_stats(self):
+    @commands.Cog.listener(name="on_guild_join")
+    @commands.Cog.listener(name="on_guild_remove")
+    async def update_stats(self, guild: Guild):
         """Actually updates the stats on all the DBL websites"""
         self.logger.debug("Updating bot stats on DBL websites..")
 
+        await self.divineDiscordBotsComAPI()
         # await self.discordBotWorldAPI()
         # await self.discordBotsGgAPI()
         # await self.botListSpaceAPI()
 
-    # Add listeners
-    @commands.Cog.listener()
-    async def on_guild_join(self, guild: Guild):
-        await self.update_stats()
-    
-    @commands.Cog.listener()
-    async def on_guild_remove(self, guild: Guild):
-        await self.update_stats()
+    async def divineDiscordBotsComAPI(self):
+        payload = {"server_count": len(self.bot.guilds)}
+        url = "https://divinediscordbots.com/bot/567246604411863041/stats"
+        headers = {"content-type": "application/json", "Authorization": self.bot.env["DIVINE_DISCORD_BOTS_COM"]}
+
+        async with self.sess.post(url, json=payload, headers=headers) as resp:
+            pass
 
 
 def setup(bot: commands.Bot):
     bot.add_cog(Events(bot))
-    #bot.add_cog(DiscordBotListPosters(bot))
+    if not bot.development:
+        bot.add_cog(DiscordBotListPosters(bot))

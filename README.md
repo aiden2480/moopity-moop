@@ -4,6 +4,7 @@ Moopity Moop
 [![updates](https://img.shields.io/github/last-commit/aiden2480/moopity-moop?color=%233498DB&label=last%20update&style=flat-square)](https://github.com/aiden2480/moopity-moop)
 [![stargazers](https://img.shields.io/github/stars/aiden2480/moopity-moop?color=%233498DB&label=stargazers&style=flat-square)](https://github.com/aiden2480/moopity-moop/stargazers)
 [![website](https://img.shields.io/badge/website-click%20here-%233498DB?style=flat-square)](https://moopity-moop.chocolatejade42.repl.co)
+[![website](https://img.shields.io/endpoint?url=https://moopity-moop.chocolatejade42.repl.co/api/shieldsio&style=flat-square)](https://moopity-moop.chocolatejade42.repl.co/invite)
 
 Moopity Moop is a feature rich bot with commands for Minecraft such as:
  - Minging Minecraft servers in real-time to find player counts, latency, etc

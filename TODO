@@ -18,7 +18,7 @@
         [ ] Get achievements
         [ ] Imgen for make-your-own-achievement
         [ ] Colour codes command
-        [ ] Add more Minecraft server commands (`hypixel`, `hive`, etc)
+        [ ] Add more Minecraft server commands (more like `hypixel`, `hive`, etc)
 
 [ ] website
     [ ] Convert the readme to HTML and make that the homepage ;)
@@ -28,7 +28,7 @@
     [ ] Open invite URL in new window
         [ ] https://stackoverflow.com/questions/22444356/html-open-link-in-new-fixed-size-window
 
-[ ] listing sites
+[x] listing sites
     [x] Create a global Markdown bot description that can be used on bot listing sites
         [x] Just use the readme lmao
 
