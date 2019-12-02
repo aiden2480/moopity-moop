@@ -1,4 +1,3 @@
-# TODO: Still need to re-format this file
 from datetime import datetime as dt
 from re import sub
 from time import ctime, time
@@ -145,8 +144,6 @@ class Minecraft(CustomCog):
          - Stats for the various gamemodes
          - Rank and money
         """
-        # TODO: Fix this one up
-        start = time()
         await ctx.trigger_typing()
         e = Embed(colour=Colour.blue(), timestamp=dt.utcnow())
         msg = await ctx.send(embed=Embed(
@@ -158,6 +155,7 @@ class Minecraft(CustomCog):
         async with self.sess.get(
             f"https://api.hypixel.net/player?name={user}&key={self.bot.env['HYPIXEL_KEY']}"
         ) as resp:
+            start = time()
             query = await resp.json()
 
         if query["success"] != True or query["player"] == None:

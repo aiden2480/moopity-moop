@@ -2,38 +2,19 @@ from datetime import datetime as dt
 from datetime import timedelta as td
 from logging import FileHandler, Formatter, StreamHandler, getLogger
 from os import environ, path
-from typing import Any, List, Optional
+from re import compile
 from subprocess import check_output
+from typing import List, Optional
 
 from aiohttp import ClientSession
-from discord import Colour, Embed, Permissions, Message, utils
+from discord import Colour, Embed, Message, Permissions, utils
 from discord.ext import commands
-
 from cogs.assets import database
 
 try: from dotenv import load_dotenv
 except ImportError: pass
 else: load_dotenv(path.join(path.dirname(path.dirname(path.dirname(__file__))), ".env"))
-
-
-
-# Helper classes
-class CustomEmbed(object):
-    def __init__(self, bot: commands.Bot):
-        self.bot = bot
-
-    def EmptyEmbed(self, set_footer=True, set_timestamp=True, **kwargs):
-        """Generate an empty embed for the bot"""
-        e = Embed()
-        e.title = kwargs.get("title", "")
-        e.description = kwargs.get("description", "")
-        e.colour = kwargs.get("colour", Colour.blue())
-
-        if set_timestamp:
-            e.timestamp = kwargs.get("timestamp", dt.utcnow())
-        if set_footer:
-            e.set_footer(text=self.bot.user, icon_url=self.bot.user.avatar_url)
-        return e
+mention_regex = compile(r"<@\!?([0-9]{1,19})>")
 
 
 class AttrDict(dict):
@@ -59,7 +40,6 @@ class CustomBot(commands.AutoShardedBot):
         self.guild_invite_url = "https://discord.gg/AJj45Sj"  # Support guild invite url
         self.session = ClientSession(loop=self.loop)  # HTTP request manager
         self.startup_time = dt.utcnow()  # Store bot startup time
-        self.EmptyEmbed = CustomEmbed(self).EmptyEmbed  # Embed template (I'm cheating lol)
         self.default_prefix = "m!" if not self.development else "." # Yayeet
         self.delete_data_on_remove = True if self.env.get("DELETE_DATA_ON_REMOVE", "False").upper() == "TRUE" else False
         self.website_url = "https://moopity-moop.chocolatejade42.repl.co" if not self.development else "http://localhost:8080"
@@ -189,3 +169,12 @@ class CustomContext(commands.Context):
             try: await msg.add_reaction(emoji)
             except: return False
         return True
+    
+    @property
+    def clean_prefix(self):
+        m = mention_regex.match(self.prefix)
+        if m:
+            user = self.bot.get_user(int(m.group(1)))
+            if user:
+                return f"@{user.name} "
+        return self.prefix

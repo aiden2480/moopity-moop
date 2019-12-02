@@ -1,6 +1,3 @@
-from asyncio import get_event_loop
-from datetime import datetime as dt
-from datetime import timedelta as td
 from typing import List
 
 from discord import Guild
@@ -79,8 +76,6 @@ class Checker(object):
 
 class ServerStatus(CustomCog):
     # TODO: What happens when someone changes the IP while the bot is still pinging hmm?
-    # TODO: Test if these changes actually work lmao
-    # TODO: Maybe add some admin commands idk
     """The cog that handles all the server pinging"""
 
     def __init__(self, bot: commands.Bot):

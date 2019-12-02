@@ -1,4 +1,3 @@
-"""Lmao literally every command in this cog is in jsk"""
 from datetime import datetime as dt
 from inspect import getsource, getsourcefile, getsourcelines
 from os.path import relpath
@@ -61,7 +60,7 @@ class Developer(CustomCog):
         e.description = f"Finished reloading `{len(cogs)}` cogs in `{round((time()-start_time)*1000)}`ms ⚙"
         await msg.edit(embed=e)
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def source(self, ctx, *, command: str = None):
         """Displays my full source code or for a specific command."""
         source_url = "https://github.com/aiden2480/moopity-moop"

@@ -14,6 +14,11 @@ class General(CustomCog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.sess = bot.session
+        self._original_help_command = bot.help_command
+        bot.remove_command("help")
+
+    def cog_unload(self):
+        self.bot.help_command = self._original_help_command
 
     @commands.command(name= "help")
     @commands.cooldown(1, 3.0)
@@ -118,5 +123,4 @@ class General(CustomCog):
 
 
 def setup(bot: commands.Bot):
-    bot.remove_command("help")
     bot.add_cog(General(bot))

@@ -1,6 +1,4 @@
-from io import BytesIO
 from urllib.parse import urlencode
-from datetime import datetime as dt
 
 from discord import Embed, Colour
 from discord.ext import commands
@@ -42,7 +40,7 @@ class Image(CustomCog):
         embed=Embed(colour=Colour.blue())
         args = msg.split("|", maxsplit=1)
         if len(args) != 2:
-            return await ctx.send(f"You must send text in the format `{ctx.prefix}{ctx.command} first | second`")
+            return await ctx.send(f"You must send text in the format `{ctx.clean_prefix}{ctx.command} first | second`")
         first = args[0].strip()
         second = args[1].strip()
         embed.set_image(url=f"{BASE_URL}/catmeme.jpg?{urlencode({'first':first, 'second':second})}")

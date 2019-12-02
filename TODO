@@ -10,8 +10,6 @@
     [ ] Create better command names/aliases
     [ ] Fix up the command descriptions/docs
     [ ] Rip off the help command from https://github.com/nguuuquaaa/Belphegor/blob/master/belphegor/help.py because that was a cool help command
-    [x] Get rid of all the `\N{NAME}` stoof because they look gross tbh
-    [x] Delete `EmptyEmbed`, I don't use it anyway
    
     [ ] Since this is a **Minecraft** bot, ima need more **Minecraft** commands
         [ ] Get recipes
@@ -23,10 +21,14 @@
 [ ] website
     [ ] Convert the readme to HTML and make that the homepage ;)
     [ ] Consider storing data in `aiohttp-session-file` instead of `aiohttp-session` EncryptedCookieStorage?
-    [ ] Replace All references of `Guild` with `Server` in the front-end scripts
-    [ ] Make an API for voting and the like?
+    [x] Replace All references of `Guild` with `Server` in the front-end scripts
+    [x] Make an API for voting and the like?
     [ ] Open invite URL in new window
         [ ] https://stackoverflow.com/questions/22444356/html-open-link-in-new-fixed-size-window
+
+[ ] database
+    [ ] Consider moving to Google Firebase
+        [ ] Advantages include constant syncing
 
 [x] listing sites
     [x] Create a global Markdown bot description that can be used on bot listing sites

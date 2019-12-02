@@ -1,11 +1,7 @@
-# TODO: Fix middlewares
 from logging import getLogger
-from os import getenv
-from time import time
 
 from aiohttp import ClientSession, web
-from aiohttp_jinja2 import get_env as jinja_env
-from aiohttp_jinja2 import render_template, template
+from aiohttp_jinja2 import template, get_env as jinja_env
 from aiohttp_session import get_session, new_session
 
 # Create objects
@@ -19,7 +15,6 @@ def login_required(fn):
         if "user_id" not in await get_session(request):
             return web.HTTPFound(request.app.oauth_url)
         return await fn(request, *args, **kwargs)
-
     return wrapped
 
 

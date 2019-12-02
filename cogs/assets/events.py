@@ -192,7 +192,7 @@ class Events(CustomCog):
             "cs": f"{ctx.guild.id}" if ctx.guild else "PRIVATE_MESSAGE",
             "dt": ctx.command.name,
         })
-        async with self.sess.get(self.gurl, params=params) as r:
+        async with self.sess.get(self.gurl, params=params) as resp:
             pass
 
     @commands.Cog.listener(name="on_guild_join")
@@ -204,7 +204,7 @@ class Events(CustomCog):
             "cs": f"{guild.id}",
             "dt": "GUILD_ADD",
         })
-        async with self.sess.get(self.gurl, params=params) as r:
+        async with self.sess.get(self.gurl, params=params) as resp:
             pass
 
     @commands.Cog.listener(name="on_guild_remove")
@@ -216,7 +216,7 @@ class Events(CustomCog):
             "cs": f"{guild.id}",
             "dt": "GUILD_REMOVE",
         })
-        async with self.sess.get(self.gurl, params=params) as r:
+        async with self.sess.get(self.gurl, params=params) as resp:
             pass
 
 

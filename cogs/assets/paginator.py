@@ -1,9 +1,10 @@
-from re import compile
+from asyncio import TimeoutError as AsyncioTimeoutError
+from asyncio import sleep
 from inspect import getdoc
-from asyncio import sleep, TimeoutError as AsyncioTimeoutError
-from discord import Embed, Colour
 from itertools import groupby
-from datetime import datetime as dt
+from re import compile
+
+from discord import Colour, Embed
 
 
 class CannotPaginate(Exception):

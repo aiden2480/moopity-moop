@@ -35,8 +35,8 @@ class Fun(CustomCog):
         if ctx.invoked_subcommand:
             return
         await ctx.send(
-            f"Use `{ctx.prefix}{ctx.command} help` for help about the akinator " \
-            "commands or `{ctx.prefix}{ctx.command} start` to start a new game"
+            f"Use `{ctx.clean_prefix}{ctx.command} help` for help about the akinator " \
+            f"commands or `{ctx.clean_prefix}{ctx.command} start` to start a new game"
         )
 
     @akinator_cmd.command()
@@ -46,7 +46,7 @@ class Fun(CustomCog):
             colour=Colour.blue(),
             timestamp=dt.utcnow(),
             title="Akinator help command",
-            description=f"Use the command `{ctx.prefix}akinator` to start a new game of Akinator",
+            description=f"Use the command `{ctx.clean_prefix}akinator` to start a new game of Akinator",
         )
 
         e.add_field(
@@ -153,8 +153,6 @@ class Fun(CustomCog):
         `easy`, `medium`, or `hard` in to the command paramenters
         and you will recieve that level difficulty trivia.
         """
-        # TODO: Do I need to change the amount of money per correct answer?
-        # TODO: Try to make this a bit neater lol
         await ctx.trigger_typing()
         params = dict(amount=1, type="multiple")
         if difficulty.lower() in ["easy", "medium", "hard"]:
@@ -172,7 +170,7 @@ class Fun(CustomCog):
         shuffle(answers)
         correct_answer_index = answers.index(question["correct_answer"])
         correct_emoji = reactions[correct_answer_index]
-        worth = dict(easy=4, medium=7, hard=12)[question["difficulty"]] + randint(0, 5)
+        worth = dict(easy=2, medium=5, hard=7)[question["difficulty"]] + randint(-3, 3)
 
         for emoji, ans in zip(reactions, answers):
             embed.description += f"\n{emoji} {unescape(ans)}"

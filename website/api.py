@@ -5,7 +5,7 @@ routes = RouteTableDef()
 
 # API routes
 @routes.get("/api/shieldsio")
-async def guildcount(request: Request):
+async def shieldsio(request: Request):
     """Returns the guildcount in https://shields.io format"""
     count=len(request.app["bot"].guilds)
     return json_response(dict(
@@ -25,7 +25,6 @@ async def guildcount(request: Request):
 # Bot list webhooks
 @routes.post("/webhook/divinediscordbotscom")
 async def divinediscordbotscom(request: Request):
-    # TODO: Implement token check
     if request.headers["Authorization"] != request.app["bot"].env["DIVINE_DISCORD_BOTS_COM"]:
         return json_response(dict(message="Invalid authentication token", status=403)) 
     

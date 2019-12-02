@@ -1,4 +1,3 @@
-from datetime import datetime as dt
 from typing import Union
 
 from discord import Colour, Embed, Role
@@ -7,7 +6,6 @@ from cogs.assets.custom import CustomCog
 
 
 class Config(CustomCog):
-    # TODO: You only need admin permissions to change the prefix lmao not view it
     """The custom settings for your server"""
 
     def __init__(self, bot: commands.Bot):
@@ -19,21 +17,17 @@ class Config(CustomCog):
     @commands.cooldown(3, 5, commands.BucketType.user)
     @commands.guild_only()
     async def config_command(self, ctx):
+        # TODO: You only need admin permissions to change the prefix lmao not view it
         """Get the config data for this server"""
-        # TODO: Make the pingo thing for the server
         emojis = self.bot.emoji
-        e = self.bot.EmptyEmbed(
-            title=f"Server config settings for **{ctx.guild}** ⚙",
-            set_footer=False,
-            set_timestamp=False,
-        )
+        e = Embed(title=f"Server config settings for **{ctx.guild}** ⚙", colour=Colour.blue())
 
         prfx = await self.db.get_guild_prefix(ctx.guild.id)
         server = await self.db.get_minecraft_server(ctx.guild.id)
         roleid = await self.db.get_minecraft_role(ctx.guild.id)
         role = ctx.guild.get_role(roleid)
 
-        p = ctx.prefix if str(self.bot.user.id) not in ctx.prefix else f"@{ctx.bot.user.name} "
+        p = ctx.clean_prefix
         e.description += f"`{p}prefix <prefix>` to change the bot prefix\n"
         e.description += f"`{p}role <role>` to set the role given to a user playing `Minecraft`\n"
         e.description += f"`{p}setserver <ip>` to set the IP for this server\n"
@@ -54,12 +48,13 @@ class Config(CustomCog):
         If prefix option is set to `""`, the prefix is returned to default.
         You must have `Manage Guild` permissions to use this command.
         """
-        embed = self.bot.EmptyEmbed()
+        embed = Embed(colour=Colour.blue(), timestamp=ctx.message.created_at)
+        embed.set_footer(text=self.bot.user, icon_url=self.bot.user.avatar_url)
 
         if prefix == None:
             prfx = await self.db.get_guild_prefix(ctx.guild.id) or self.bot.default_prefix
 
-            embed.description = f'Hello **{ctx.author}** 👋 My prefix here is **`{prfx}`**\n\nUse `{ctx.prefix}{ctx.command.name} <prefix>` to set the prefix or `{ctx.prefix}{ctx.command.name} ""` to reset it the the default'
+            embed.description = f'Hello **{ctx.author}** 👋 My prefix here is **`{prfx}`**\n\nUse `{ctx.clean_prefix}{ctx.command.name} <prefix>` to set the prefix or `{ctx.clean_prefix}{ctx.command.name} ""` to reset it the the default'
             return await ctx.send(embed=embed)
 
         if prefix in ["", self.bot.default_prefix]:
@@ -84,7 +79,8 @@ class Config(CustomCog):
         If ip option is set to `""`, the prefix is returned to default.
         You must have `Manage Guild` permissions to use this command.
         """
-        embed = self.bot.EmptyEmbed()
+        embed = Embed(colour=Colour.blue(), timestamp=ctx.message.created_at)
+        embed.set_footer(text=self.bot.user, icon_url=self.bot.user.avatar_url)
 
         if ip == None:
             i = await self.db.get_minecraft_server(ctx.guild.id) or None
@@ -116,7 +112,8 @@ class Config(CustomCog):
         to determine who in your server is playing `Minecraft`.\n
         **Please note**: This command requires that the bots *top* role must
         be above the designated `Minecraft` role"""
-        embed = self.bot.EmptyEmbed()
+        embed = Embed(colour=Colour.blue(), timestamp=ctx.message.created_at)
+        embed.set_footer(text=self.bot.user, icon_url=self.bot.user.avatar_url)
 
         if role in ["", "reset"]:
             embed.description = "Minecraft role has been cleared"

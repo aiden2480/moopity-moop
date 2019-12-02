@@ -1,4 +1,4 @@
-from random import randint, shuffle
+from random import randint
 from typing import Optional
 
 from discord import Colour, Embed, Member, User
@@ -39,7 +39,7 @@ class Currency(CustomCog):
         lbdata = await self.db.get_leaderboard(ctx.guild, maxusers=10)
         if not lbdata:
             embed.description += "It seems that literally everyone in this server is broke 🤷\n"
-            embed.description += f"Use {ctx.prefix}daily to get started"
+            embed.description += f"Use {ctx.clean_prefix}daily to get started"
         
         for id_, money in lbdata.items():
             emoji = self.db.LEADERBOARD_EMOJI_KEY.get(
@@ -90,8 +90,6 @@ class Currency(CustomCog):
         The only bot that you can steal from is this one.
         However, there is a 60% chance that you will fail,
         but also a 125% reward if you are successful"""
-        # FIXME: Check this hasn't broken again
-        # Eh I can't be bothered to fix it so I'll just hope it works
         you = await self.db.get_user_money(ctx.author.id, human_readable=False)
         vtm = await self.db.get_user_money(victim.id, human_readable=False)
         win = randint(0, 100) > 35
@@ -144,24 +142,6 @@ class Currency(CustomCog):
             return await self.db.add_user_money(ctx.author.id, -1)
         await ctx.send(f"Congrats you have ESP. As a result, you were rewarded with `$1`")
         await self.db.add_user_money(ctx.author.id, 1)
-
-
-    @commands.command(enabled=False)
-    async def blackjack(self, ctx, amount:int):
-        """Play blackjack with the bot
-        TODO: update description
-        https://github.com/gsamarakoon/Fun-projects-for-Python/blob/master/A%20game%20of%20BlackJack.ipynb
-        """
-        # TODO: I might just delete this lol
-        amt = await self.db.get_user_money(ctx.author.id, human_readable=False)
-        if amount > amt:
-            return await ctx.send(f"You only have `${amt}` to bet..")
-        
-        embed = Embed(colour=Colour.blue(), title=f"{ctx.author}'s blackjack game")
-        msg=await ctx.send(embed=embed)
-        for reaction in "\U0001f1ed \U0001f1f8".split():
-            await msg.add_reaction(reaction)
-            # TODO: This is going to suck a lot lmao
 
 
 class AdminCurrency(CustomCog):

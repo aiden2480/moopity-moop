@@ -135,11 +135,10 @@ async def on_message(m: Message):
 
 @bot.event
 async def on_command_error(ctx: commands.Context, error):
-    # TODO: Cleanup this and make it look a bit nicer
     """Bot error handler"""
 
     if getattr(ctx, "error_handled", False):
-        return  # Check if error already handled
+        return # Check if error already handled
 
     # Find the actual error, if it is a `CommandInvokeError`
     error = getattr(error, "original", error)
@@ -166,7 +165,7 @@ async def on_command_error(ctx: commands.Context, error):
         e.description = str(error)
         e.add_field(
             name="The correct usage is",
-            value=f"```{ctx.prefix}{ctx.command} {ctx.command.signature}```",
+            value=f"```{ctx.clean_prefix}{ctx.command} {ctx.command.signature}```",
         )
         await ctx.send(embed=e)
     elif isinstance(error, commands.DisabledCommand):
