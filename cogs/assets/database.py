@@ -14,6 +14,9 @@ class Database(object):
 
     def __init__(self, url: str = getenv("DATABASE_URL")):
         self.client = jsonstore.AsyncClient(url)
+        self.guild_minecraft_roles = dict()
+        self.guild_server_ips = dict()
+        get_event_loop().run_until_complete(self.update_cache())
 
     # Upkeep stuff
     async def update_cache(self):

@@ -10,7 +10,7 @@ async def guildcount(request: Request):
     count=len(request.app["bot"].guilds)
     return json_response(dict(
         color="#3498DB",
-        label="Server count",
+        label="server count",
         message=f"{count} unique",
         schemaVersion=1,
     ))

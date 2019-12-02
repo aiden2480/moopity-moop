@@ -59,9 +59,6 @@ async def on_ready():
         return
     bot.ready_time = dt.utcnow()
     bot.logger.info("Bot ready - {0.name!r} ({0.id})".format(bot.user))
-    await bot.db.update_cache()
-    bot.database_ready = True
-    bot.logger.info("Database ready")
     bot.load_extension("cogs.assets.periodic")
 
     # Update env on site
@@ -97,7 +94,12 @@ async def on_ready():
 
 @bot.event
 async def on_connect():
+    await bot.db.update_cache()
+    bot.database_ready = True
+
     bot.logger.info(f"Bot reconnected at {dt.now():%H:%M:%S}")
+    bot.logger.info("Database ready")
+
     await bot.change_presence(
         status=Status.online,
         afk=False,
