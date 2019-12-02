@@ -10,12 +10,13 @@
     [ ] Create better command names/aliases
     [ ] Fix up the command descriptions/docs
     [ ] Rip off the help command from https://github.com/nguuuquaaa/Belphegor/blob/master/belphegor/help.py because that was a cool help command
+    [ ] Create voter-only commands, maybe worth more coins?
    
     [ ] Since this is a **Minecraft** bot, ima need more **Minecraft** commands
         [ ] Get recipes
         [ ] Get achievements
         [ ] Imgen for make-your-own-achievement
-        [ ] Colour codes command
+        [ ] Colour codes command for MOTD
         [ ] Add more Minecraft server commands (more like `hypixel`, `hive`, etc)
 
 [ ] website

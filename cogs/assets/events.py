@@ -15,15 +15,6 @@ class Events(CustomCog):
         - Checking for blacklisted guilds
         - Deleting old user's data
         - Posting data to Google Analytics
-    
-    The cheat sheet for Google Analytics is as follows:
-        v: version            t: type (of hit)
-        aip: anonymise IP     tid: tracking ID
-        an: application name  dp: document path
-        dh: document host     uid: user ID
-        cid: client ID        cs: campaign source
-        cm: campaign medium   cd: screen name
-        dt: document title    cc: campaign content
     """
 
     def __init__(self, bot: commands.Bot):
@@ -33,12 +24,6 @@ class Events(CustomCog):
         self.sess = bot.session
         self.guild_webhook_url = bot.env["GUILD_WEBHOOK_URL"]
         self.commands_webhook_url = bot.env["COMMANDS_WEBHOOK_URL"]
-        self.gurl = "https://www.google-analytics.com/collect"
-        self.gparams = dict(
-            v="1", t="pageview", aip="1",
-            tid=self.bot.env["GOOGLE_TRACKING_ID"],
-            an=str(bot.user), dh=bot.website_url,
-        )
 
     # Webhook events
     @commands.Cog.listener(name="on_guild_join")
@@ -182,6 +167,30 @@ class Events(CustomCog):
         )
         await guild.leave()
 
+
+class GoogleAnalytics(CustomCog):
+    """
+    The cheat sheet for Google Analytics is as follows:
+        v: version            t: type (of hit)
+        aip: anonymise IP     tid: tracking ID
+        an: application name  dp: document path
+        dh: document host     uid: user ID
+        cid: client ID        cs: campaign source
+        cm: campaign medium   cd: screen name
+        dt: document title    cc: campaign content
+    """
+
+    def __init__(self, bot: commands.Bot):
+        super().__init__(self)
+        self.sess = bot.session
+        self.gurl = "https://www.google-analytics.com/collect"
+        self.gparams = dict(
+            cm="discord",
+            v="1", t="pageview", aip="1",
+            tid=self.bot.env["GOOGLE_TRACKING_ID"],
+            an=str(bot.user), dh=bot.website_url,
+        )
+
     # Google Analytics
     @commands.Cog.listener(name="on_command")
     async def analytics_on_command(self, ctx):
@@ -253,4 +262,5 @@ class DiscordBotListPosters(CustomCog):
 def setup(bot: commands.Bot):
     bot.add_cog(Events(bot))
     if not bot.development:
+        bot.add_cog(GoogleAnalytics(bot))
         bot.add_cog(DiscordBotListPosters(bot))

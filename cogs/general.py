@@ -112,6 +112,16 @@ class General(CustomCog):
         """)
         e.set_author(name=f"Invite links for {self.bot.user}", icon_url=self.bot.user.avatar_url)
         await ctx.send(embed=e)
+    
+    @commands.command()
+    async def vote(self, ctx):
+        """Shows bot list voting pages for the bot"""
+        embed = Embed(colour=Colour.blue(), description="", timestamp=ctx.message.created_at)
+        embed.set_author(name=f"{self.bot.user}'s voting links", icon_url=self.bot.user.avatar_url)
+        embed.set_footer(text=f"Each vote will gain you $40 ({ctx.clean_prefix}bal)")
+        
+        embed.description += "<:logo:459634405183586304> [Divine Discord Bots](https://divinediscordbots.com/bot/567246604411863041/vote)"
+        await ctx.send(embed=embed)
 
     @commands.command()
     async def uptime(self, ctx):
