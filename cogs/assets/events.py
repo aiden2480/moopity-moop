@@ -187,7 +187,7 @@ class GoogleAnalytics(CustomCog):
         self.gparams = dict(
             cm="discord",
             v="1", t="pageview", aip="1",
-            tid=self.bot.env["GOOGLE_TRACKING_ID"],
+            tid=bot.env["GOOGLE_TRACKING_ID"],
             an=str(bot.user), dh=bot.website_url,
         )
 
