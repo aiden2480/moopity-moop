@@ -303,6 +303,31 @@ class Minecraft(CustomCog):
         e.set_thumbnail(url="https://api.minetools.eu/favicon/play.hivemc.com")
         e.set_footer(text=f"Information gathered in {round((time()- start)*1000)}ms", icon_url=self.bot.user.avatar_url)
         return await msg.edit(embed=e)
+    
+
+    @commands.cooldown(8, 45, commands.BucketType.user)
+    @commands.command(aliases=["usernamecheck"])
+    async def namecheck(self, ctx, name):
+        """Check if a Minecraft username is taken, or if you can claim it"""
+        if len(name) > 16:
+            return await ctx.send("A Minecraft username is a max of 16 characters...")
+        
+        await ctx.trigger_typing()
+        embed = Embed(colour=Colour.blue())
+        embed.set_author(name=f"Username checker")
+        async with self.sess.get(f"https://api.mojang.com/users/profiles/minecraft/{name}") as resp:
+            if resp.status not in [200, 204]:
+                embed.description = f"An error occoured while processing the request.\nI got an unexpected status `{resp.status}` 😕"
+            elif resp.status == 204:
+                embed.description = f"The username `{name}` is free!\n[Click here](https://account.mojang.com/me) to claim the account! {self.bot.emoji.minecraft}"
+            elif resp.status == 200:
+                udata = await resp.json()
+                embed.description = f"The username `{udata['name']}` is taken! 😕"
+                embed.add_field(name=f"{udata['name']}'s UUID", value=udata["id"])
+                embed.set_thumbnail(url=f"https://minotar.net/body/{name}")
+                embed.set_author(name=embed.author.name, icon_url=f"https://minotar.net/avatar/{name}")
+            
+        await ctx.send(embed=embed)
 
 
 def setup(bot: commands.Bot):

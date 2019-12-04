@@ -6,18 +6,25 @@
     [ ] Reformat the size of the images in the readme
 
 [ ] bot
-    [x] Make `@commands.command` the first decorator on any command
     [ ] Create better command names/aliases
     [ ] Fix up the command descriptions/docs
     [ ] Rip off the help command from https://github.com/nguuuquaaa/Belphegor/blob/master/belphegor/help.py because that was a cool help command
     [ ] Create voter-only commands, maybe worth more coins?
+
+    [ ] Gambling command
+        [ ] Slots
+    
+    [ ] User profile command, showing money, servers, whatever
+        [ ] Link Minecraft account with Discord, by UUID
    
     [ ] Since this is a **Minecraft** bot, ima need more **Minecraft** commands
         [ ] Get recipes
         [ ] Get achievements
-        [ ] Imgen for make-your-own-achievement
+        [x] Imgen for make-your-own-achievement
+            [x] https://minecraftskinstealer.com/achievement
         [ ] Colour codes command for MOTD
         [ ] Add more Minecraft server commands (more like `hypixel`, `hive`, etc)
+        [ ] Add a command to find the latest Minecraft version, or post on https://minecraft.net
 
 [ ] website
     [ ] Convert the readme to HTML and make that the homepage ;)
@@ -34,6 +41,7 @@
 [x] listing sites
     [x] Create a global Markdown bot description that can be used on bot listing sites
         [x] Just use the readme lmao
+    [ ] Now verified on https://discord.boats, make a server poster and upvote detector for that too
 
 [ ] Clean up files
     [ ] `cogs.assets.custom`

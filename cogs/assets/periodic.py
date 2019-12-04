@@ -83,6 +83,13 @@ class ServerStatus(CustomCog):
         self.bot = bot
         self.db = bot.db
         self.tasks: List[Checker] = list()
+    
+    @commands.Cog.listener()
+    async def on_ready(self):
+        while not self.bot.database_ready:
+            pass
+        if self.tasks != list():
+            return # Tasks already loaded
         
         self.logger.debug(f"{self.__class__.__name__!r} cog ready, loading checkers")
         for guildid, serverip in self.db.guild_server_ips.items():

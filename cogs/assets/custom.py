@@ -3,7 +3,7 @@ from datetime import timedelta as td
 from logging import FileHandler, Formatter, StreamHandler, getLogger
 from os import environ, path
 from re import compile
-from subprocess import check_output
+from subprocess import check_output, CalledProcessError
 from typing import List, Optional
 
 from aiohttp import ClientSession
@@ -45,7 +45,9 @@ class CustomBot(commands.AutoShardedBot):
         self.website_url = "https://moopity-moop.chocolatejade42.repl.co" if not self.development else "http://localhost:8080"
         self.oauth_callback = f"{self.website_url}/login"
         self.database_ready = False
-        self.VERSION = check_output("git describe --tags --always", shell=True).decode().strip()
+        
+        try: self.VERSION = check_output("git describe --tags --always", shell=True).decode().strip()
+        except CalledProcessError: self.VERSION = "Latest"
 
         # Set up logging
         self.logger = getLogger("bot")

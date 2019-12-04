@@ -29,7 +29,7 @@ from website.api import routes as backend_routes
 bot = CustomBot(
     command_prefix=prefix,
     description="A small bot with commands to utilise your Minecraft/Discord experience",
-    owner_id=272_967_064_531_238_912,
+    owner_id=272967064531238912,
     status=Status.idle,
     activity=Activity(type=2, name="Windows XP startup sounds"),
     case_insensitive=True,
@@ -59,7 +59,6 @@ async def on_ready():
         return
     bot.ready_time = dt.utcnow()
     bot.logger.info("Bot ready - {0.name!r} ({0.id})".format(bot.user))
-    bot.load_extension("cogs.assets.periodic")
 
     # Update env on site
     env = jinja_env(site)
@@ -81,14 +80,12 @@ async def on_ready():
     # Announce our presence to the whole wide world
     webhook = Webhook.from_url(bot.env["COMMANDS_WEBHOOK_URL"], adapter=AsyncWebhookAdapter(bot.session))
     e = Embed(
-        colour=0x00B7D9,
-        timestamp=dt.utcnow(),
+        colour=0x00B7D9, timestamp=dt.utcnow(),
         description=f"Time taken to load: `{bot.get_uptime()}`",
     )
 
     e.set_footer(text=bot.user)
     e.set_author(name="Bot restarted", icon_url="https://bit.ly/2Sd33Wx")
-
     await webhook.send(embed=e, username=bot.user.name, avatar_url=bot.user.avatar_url)
 
 
@@ -104,9 +101,10 @@ async def on_connect():
         status=Status.online,
         afk=False,
         activity=Game(name=choice((
+            "Minecraft",
             f"{bot.default_prefix}help for commands!",
             f"created by {await bot.fetch_user(bot.owner_id)}",
-            "Minecraft",
+            f"{len(bot.users)} users accross {len(bot.guilds)} servers",
     ))))
 
 
@@ -127,10 +125,12 @@ async def on_message(m: Message):
     # Just in case some idiot managed to lose the prefix
     ctx = await bot.get_context(m)
     if ctx.invoked_subcommand is None and ctx.guild:
-        if m.content.strip() == ctx.guild.me.mention:
-            await ctx.trigger_typing()
-            prfx = await bot.db.get_guild_prefix(m.guild.id) or bot.default_prefix
-            await ctx.send(f"Hello **{ctx.author}** 👋 My prefix in this server is `{prfx}`")
+        if m.content.strip() == ctx.me.mention:
+            try:
+                await ctx.trigger_typing()
+                prfx = await bot.db.get_guild_prefix(m.guild.id) or bot.default_prefix
+                await ctx.send(f"Hello **{ctx.author}** 👋 My prefix in this server is `{prfx}`")
+            except Forbidden: await ctx.react("‼") # Can't send messages
 
 
 @bot.event
@@ -163,10 +163,7 @@ async def on_command_error(ctx: commands.Context, error):
     elif isinstance(error, param_errors):
         e.title = "Incorrect use of command"
         e.description = str(error)
-        e.add_field(
-            name="The correct usage is",
-            value=f"```{ctx.clean_prefix}{ctx.command} {ctx.command.signature}```",
-        )
+        e.add_field(name="The correct usage is", value=f"```{ctx.clean_prefix}{ctx.command} {ctx.command.signature}```")
         await ctx.send(embed=e)
     elif isinstance(error, commands.DisabledCommand):
         e = Embed(colour=0xFB8F02)
@@ -176,8 +173,7 @@ async def on_command_error(ctx: commands.Context, error):
             msg = await ctx.send(embed=e)
 
             ctx.command.enabled = True
-            try:
-                await ctx.reinvoke()
+            try: await ctx.reinvoke()
             except Exception as err:
                 await ctx.send(f"```py\n{err.__class__.__name__}: {err}```")
                 raise
@@ -236,15 +232,10 @@ async def on_command_error(ctx: commands.Context, error):
             return await ctx.send(embed=e)
 
         webhook = Webhook.from_url(bot.env["ERROR_WEBHOOK_URL"], adapter=AsyncWebhookAdapter(bot.session))
-        await webhook.send(
-            embed=e, username=bot.user.name,
-            avatar_url=bot.user.avatar_url
-        )
+        await webhook.send(embed=e, username=bot.user.name, avatar_url=bot.user.avatar_url)
 
         em = Embed(
-            color=0xFFA500,
-            timestamp=dt.utcnow(),
-            title="💣 Oof, an error occoured 💥",
+            color=0xFFA500, timestamp=dt.utcnow(), title="💣 Oof, an error occoured 💥",
             description=f"Please [join the support guild]({bot.guild_invite_url}) and tell **{aidzman}** what happened to help fix this bug.\n\nError code: {error_code}",
         )
 
@@ -267,7 +258,7 @@ if __name__ == "__main__":
         "hidden",
         # Extra cogs
         "assets.events",
-        # "assets.periodic", # Added in on_ready
+        "assets.periodic",
     ]: bot.load_extension(f"cogs.{cog}")
     bot.load_extension("jishaku")
     bot.logger.debug("Cogs loaded")
@@ -275,6 +266,7 @@ if __name__ == "__main__":
     # Warnings
     filterwarnings("ignore", category=EmptyResponseWarning)
     [bot.logger.warning(f"Disabled command `{cmd!s}` found in cog `{cmd.cog.qualified_name}`") for cmd in bot.walk_commands() if not cmd.enabled]
+    [bot.logger.warning(f"Command `{cmd!s}` found in cog `{cmd.cog.qualified_name}` has no help text!") for cmd in bot.commands if cmd.help is None]
 
     # Setup the website
     site.add_routes(frontend_routes)
@@ -294,7 +286,6 @@ if __name__ == "__main__":
     loop.run_until_complete(webserver.start())
     site.logger.info(f"Starting website on {webserver.name}")
     bot.webrunner = webrunner
-    # asyncio.ensure_future(web._run_app(site))
 
     # Run the bot
     try:

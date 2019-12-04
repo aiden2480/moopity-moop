@@ -245,10 +245,8 @@ class DiscordBotListPosters(CustomCog):
         """Actually updates the stats on all the DBL websites"""
         self.logger.debug("Updating bot stats on DBL websites..")
 
+        await self.discordBoatsAPI()
         await self.divineDiscordBotsComAPI()
-        # await self.discordBotWorldAPI()
-        # await self.discordBotsGgAPI()
-        # await self.botListSpaceAPI()
 
     async def divineDiscordBotsComAPI(self):
         payload = {"server_count": len(self.bot.guilds)}
@@ -258,6 +256,14 @@ class DiscordBotListPosters(CustomCog):
         async with self.sess.post(url, json=payload, headers=headers) as resp:
             pass
 
+    async def discordBoatsAPI(self):
+        # FIXME: This one isn't working oof
+        payload = {"server_count": len(self.bot.guilds)}
+        url = "https://discord.boats/api/bot/567246604411863041"
+        headers = {"content-type": "application/json", "Authorization": self.bot.env["DISCORD_BOATS"]}
+
+        async with self.sess.post(url, json=payload, headers=headers) as resp:
+            pass
 
 def setup(bot: commands.Bot):
     bot.add_cog(Events(bot))

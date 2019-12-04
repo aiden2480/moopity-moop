@@ -12,6 +12,7 @@ from discord import Colour, Embed, File
 from discord.ext import commands
 from cogs.assets.custom import CustomCog
 
+REDDIT_POST_LIMIT=75
 GLITCH_ALL = "".join((chr(i) for i in range(0x300, 0x370))) + "".join((chr(i) for i in range(0x483, 0x48a)))
 
 
@@ -240,6 +241,35 @@ class Fun(CustomCog):
         ```""".splitlines())
         await msg.edit(embed=embed)
         await self.db.add_user_money(ctx.author.id, coins)
+    
+    @commands.command(enabled=False)
+    async def reddit(self, ctx):
+        """Get a random post off r/minecraft"""
+        await ctx.trigger_typing()
+        embed = Embed(colour=Colour.blue())
+        async with self.sess.get(f"https://reddit.com/r/minecraft/top.json?limit={REDDIT_POST_LIMIT}") as resp:
+            data = await resp.json()
+            post = choice(data["data"]["children"])["data"]
+        footer = f"👍 {post['ups']} | 💬 {post['num_comments']}"
+        url = Embed.Empty
+        file = None
+        await ctx.send(f"https://reddit.com{post['permalink']}")
+
+        if post["all_awardings"]:
+            award = post["all_awardings"][-1:]
+            footer = f"{award['name']} x{award['count']}" +f" | {footer}"
+            url = award["icon_url"]
+
+        # TODO: Implement if the video size is too big
+        if post["post_hint"] == "video:hosted":
+            url = post["media"]["reddit_video"]["fallback_url"]
+            async with self.sess.get(url) as resp:
+                file=File(BytesIO(await resp.read()), filename="video.mp4")
+
+        #embed.set_image(url=post["url"])
+        embed.set_footer(text=footer, icon_url=url)
+        embed.description = f"{self.bot.emoji.minecraft} [`{post['author']}`](https://reddit.com/u/{post['author']}) - [{post['title']}](https://reddit.com{post['permalink']})"
+        await ctx.send(embed=embed, file=file)
 
 
 def setup(bot: commands.Bot):
