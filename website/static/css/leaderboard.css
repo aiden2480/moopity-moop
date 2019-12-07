@@ -1,0 +1,33 @@
+#leaderboard {
+    background-color: #2F3136;
+}
+
+.leaderboard-user {
+    position: relative;
+    padding-bottom: 10px;
+}
+.leaderboard-user .avatar {
+    position: relative;
+    top: 5px;
+    left: 5px;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+}
+.leaderboard-user .circle {
+    position: absolute;
+    top: 1.5px;
+    left: 1.5px;
+    border-radius: 50%;
+    background-color: #2F3136;
+    width: 30px;
+    height: 30px;
+}
+.leaderboard-user .award {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    width: 18px;
+    height: 18px;
+    border-radius: 0%;
+}

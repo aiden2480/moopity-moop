@@ -26,14 +26,8 @@ class Minecraft(CustomCog):
          - Player count
          - Players online (if possible)
         """
-        start = time()
         await ctx.trigger_typing()
-        e = Embed(title=server, colour=Colour.blue())
-        msg = await ctx.send(embed=Embed(
-            title="Ping in progress..",
-            description="This could take a few seconds",
-            colour=Colour.blue(),
-        ))
+        e = Embed(title=server, colour=Colour.blue(), timestamp=ctx.message.created_at)
 
         async with self.sess.get(f"https://api.minetools.eu/ping/{server}") as resp:
             try:
@@ -47,7 +41,7 @@ class Minecraft(CustomCog):
             e.colour = Colour.red()
             e.title = "Error pinging server"
             e.description = error
-            return await msg.edit(embed=e)
+            return await ctx.send(embed=e)
 
         fields = {
             "Ping :ping_pong:": str(round(response["latency"], 2)) + "ms",
@@ -59,13 +53,12 @@ class Minecraft(CustomCog):
 
         for field in fields:
             e.add_field(name=field, value=fields[field])
-        e.timestamp = dt.utcnow()
         e.description = sub("§[a-zA-z0-9]", "", response["description"])
-        e.set_footer(text=f"Server pinged in {round((time()- start)*1000)}ms", icon_url=self.bot.user.avatar_url)
+        e.set_footer(text=f"Server pinged in {round((time()-ctx.message.created_at.timestamp())*1000)}ms", icon_url=self.bot.user.avatar_url)
         e.set_thumbnail(url=f"https://api.minetools.eu/favicon/{server}")
-        await msg.edit(embed=e)
+        await ctx.send(embed=e)
 
-    @commands.command(aliases=["user"])
+    @commands.command(aliases=["user", "profile"])
     @commands.cooldown(2, 12, commands.BucketType.user)
     async def mcuser(self, ctx, name_or_UUID):
         """Find a minecraft user by username or UUID"""
@@ -73,22 +66,15 @@ class Minecraft(CustomCog):
         await ctx.trigger_typing()
         emojis = self.bot.emoji
         e = Embed(colour=Colour.blue())
-        msg = await ctx.send(embed=Embed(
-            title="Ping in progress..",
-            description="This could take a few seconds",
-            colour=Colour.blue(),
-        ))
 
-        try:
-            async with self.sess.get(f"https://api.mojang.com/users/profiles/minecraft/{name_or_UUID}") as resp:
-                userinfo = await resp.json()
-            async with self.sess.get(f"https://api.mojang.com/user/profiles/{userinfo['id']}/names") as resp:
-                usernamehistory = await resp.json()
-        except Exception:
-            return await msg.edit(embed=Embed(
-                colour=Colour.red(),
-                description=f"Could not find user by `UUID` or `nick` as **`{name_or_UUID}`**",
-            ))
+        async with self.sess.get(f"https://api.mojang.com/users/profiles/minecraft/{name_or_UUID}") as resp:
+            if resp.status != 200:
+                e.colour = Colour.red()
+                e.description=f"Could not find user by `UUID` or `nick` as **`{name_or_UUID}`**"
+                return await ctx.send(embed=e)
+            userinfo = await resp.json()
+        async with self.sess.get(f"https://api.mojang.com/user/profiles/{userinfo['id']}/names") as resp:
+            usernamehistory = await resp.json()
 
         e.add_field(name=f"Name {emojis.minecraft}", value=userinfo["name"])
         e.add_field(name=f"UUID {emojis.goldenapple}", value=userinfo["id"])
@@ -112,7 +98,7 @@ class Minecraft(CustomCog):
             icon_url=self.bot.user.avatar_url,
         )
         e.timestamp = dt.utcnow()
-        await msg.edit(embed=e)
+        await ctx.send(embed=e)
 
     @commands.command(name="status", aliases=["mcserverstatus"])
     @commands.cooldown(2, 12, commands.BucketType.user)
@@ -146,11 +132,6 @@ class Minecraft(CustomCog):
         """
         await ctx.trigger_typing()
         e = Embed(colour=Colour.blue(), timestamp=dt.utcnow())
-        msg = await ctx.send(embed=Embed(
-            title="Gathering stats",
-            description="This could take a few seconds",
-            colour=Colour.blue(),
-        ))
 
         async with self.sess.get(
             f"https://api.hypixel.net/player?name={user}&key={self.bot.env['HYPIXEL_KEY']}"
@@ -162,12 +143,12 @@ class Minecraft(CustomCog):
             e.colour = Colour.red()
             e.description = "Player stats could not be retrieved 🤷"
             e.set_footer(text=self.bot.user, icon_url=self.bot.user.avatar_url)
-            return await msg.edit(embed=e)
+            return await ctx.send(embed=e)
 
         if not query["player"].get("lastLogin"):
             e.colour =  Colour.orange()
             e.description = f"User `{user}` has never logged into `mc.hypixel.net` 🤷"
-            return await msg.edit(embed=e)
+            return await ctx.send(embed=e)
 
         stats = query["player"]
         last_session = self.bot.time_between(
@@ -221,7 +202,7 @@ class Minecraft(CustomCog):
             name=f"Hypixel stats for {stats['playername']}",
             icon_url="https://api.minetools.eu/favicon/mc.hypixel.net",
         )
-        await msg.edit(embed=e)
+        await ctx.send(embed=e)
 
     @commands.command(aliases=["thehive", "hiveuser"])
     @commands.cooldown(2, 12, commands.BucketType.user)
@@ -230,18 +211,13 @@ class Minecraft(CustomCog):
         start = time()
         await ctx.trigger_typing()
         e = Embed(colour=Colour.blue(), timestamp=dt.utcnow())
-        msg = await ctx.send(embed=Embed(
-            title="Gathering stats",
-            description="This could take a few seconds",
-            colour=Colour.blue()
-        ))
 
         async with self.sess.get(f"http://api.hivemc.com/v1/player/{user}") as resp:
             if resp.status == 404:
                 e.colour = Colour.red()
                 e.description = "Player stats could not be retrieved 🤷"
                 e.set_footer(text=self.bot.user, icon_url=self.bot.user.avatar_url)
-                return await msg.edit(embed=e)
+                return await ctx.send(embed=e)
             query = await resp.json()
 
         if query["rankName"] == "Regular Hive Member":
@@ -261,15 +237,12 @@ class Minecraft(CustomCog):
         """,
         )
 
-        e.add_field(
-            name="Login Details 📅",
-            value=f"""
+        e.add_field(name="Login Details 📅", value=f"""
             First login: `{ctime(query["firstLogin"])}`
             (`{naturaltime(dt.fromtimestamp(query["firstLogin"]))}`)
             Last login: `{ctime(query["lastLogin"])}`
             (`{naturaltime(dt.fromtimestamp(query["lastLogin"]))}`)
-        """,
-        )
+        """)
         e.set_author(
             name=f"The Hive stats for {query['username']}",
             icon_url="https://api.minetools.eu/favicon/play.hivemc.com",
@@ -278,7 +251,7 @@ class Minecraft(CustomCog):
             text=f"Information gathered in {round((time()- start)*1000)}ms",
             icon_url=self.bot.user.avatar_url,
         )
-        await msg.edit(embed=e)
+        await ctx.send(embed=e)
 
     @commands.command(aliases=["thehivestats"])
     @commands.cooldown(2, 5, commands.BucketType.user)
@@ -286,24 +259,17 @@ class Minecraft(CustomCog):
         """Fetch stats about the hive server"""
         start = time()
         await ctx.trigger_typing()
-        e = Embed(colour=Colour.blue(), timestamp=dt.utcnow())
-        msg = await ctx.send(embed=Embed(
-            title="Gathering stats",
-            description="This could take a few seconds",
-            colour=Colour.blue(),
-        ))
+        e = Embed(title="The Hive stats 🐝", colour=Colour.blue(), timestamp=dt.utcnow())
 
         async with self.sess.get("http://api.hivemc.com/v1/server/playercount") as resp:
             playercount = (await resp.json())["count"]
         async with self.sess.get("http://api.hivemc.com/v1/server/uniquecount") as resp:
             uplayercount = (await resp.json())["count"]
 
-        e.title = "The Hive stats 🐝"
-        e.description = f"**Current player count**: `{playercount}`\n**Unique player count**: `{uplayercount}`"
+        e.description = f"**Current player count**: `{int(playercount):,}`\n**Unique player count**: `{int(uplayercount):,}`"
         e.set_thumbnail(url="https://api.minetools.eu/favicon/play.hivemc.com")
         e.set_footer(text=f"Information gathered in {round((time()- start)*1000)}ms", icon_url=self.bot.user.avatar_url)
-        return await msg.edit(embed=e)
-    
+        return await ctx.send(embed=e)
 
     @commands.cooldown(8, 45, commands.BucketType.user)
     @commands.command(aliases=["usernamecheck"])
@@ -320,13 +286,26 @@ class Minecraft(CustomCog):
                 embed.description = f"An error occoured while processing the request.\nI got an unexpected status `{resp.status}` 😕"
             elif resp.status == 204:
                 embed.description = f"The username `{name}` is free!\n[Click here](https://account.mojang.com/me) to claim the account! {self.bot.emoji.minecraft}"
+                embed.set_thumbnail(url="https://minotar.net/body/MHF_Steve")
             elif resp.status == 200:
                 udata = await resp.json()
                 embed.description = f"The username `{udata['name']}` is taken! 😕"
                 embed.add_field(name=f"{udata['name']}'s UUID", value=udata["id"])
                 embed.set_thumbnail(url=f"https://minotar.net/body/{name}")
                 embed.set_author(name=embed.author.name, icon_url=f"https://minotar.net/avatar/{name}")
-            
+        await ctx.send(embed=embed)
+    
+    @commands.command()
+    async def sales(self, ctx):
+        """Shows the sales statistics for Minecraft"""
+        await ctx.trigger_typing()
+        embed = Embed(colour=Colour.blue(), title=f"{self.bot.emoji.minecraft} Minecraft Sale Statistics")
+        payload = {"metricKeys": ["item_sold_minecraft", "prepaid_card_redeemed_minecraft", "item_sold_cobalt", "item_sold_scrolls"]}
+        async with self.sess.post("https://api.mojang.com/orders/statistics", json=payload) as resp:
+            data = await resp.json()
+
+        embed.add_field(name="Total sales", value=f"{data['total']:,}")
+        embed.add_field(name="Last 24 hours", value=f"{data['last24h']:,}")
         await ctx.send(embed=embed)
 
 

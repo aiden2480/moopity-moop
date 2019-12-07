@@ -5,15 +5,6 @@
 {% block head %}
     <style>
         h3 {color: #00A2DD}
-        .guild {display: flex}
-        .guild *:not(img) {margin: 0}
-        .guild img {
-            margin-right: 10px;
-            display: block;
-            border-radius:50%;
-            width:96px;
-            height:96px
-        }
     </style>
 {% endblock head %}
 
@@ -23,7 +14,7 @@
     <h3 style="margin-top: 0px">Listed below are the servers where you have permissions to <code>Manage Server</code>. You can view and edit server settings such as the bot prefix, server IP and designated Minecraft role</h3>
     
     {% for guild in guilds %}
-        <div class="guild">
+        <div class="icontext">
             {% if guild.icon %}
                 <img alt="{{ guild.name }}'s icon" src="https://cdn.discordapp.com/icons/{{ guild.id }}/{{ guild.icon }}.png"/>
             {% else %}

@@ -18,8 +18,8 @@
     <table>
         <tr>
             <th>Command</th>
+            <th>Description</th>
             <th>Usage</th>
-            <th>Help</th>
         </tr>
         {% for cog in data %}
             <tr>
@@ -28,8 +28,8 @@
             {% for cmd in data[cog] %}
                 <tr>
                     <td>{{ cmd.name }}</tb>
-                    <td><code>{{ bot.default_prefix }}{{ cmd }} {{ cmd.signature }}</code></tb>
                     <td>{{ cmd.short_doc or "No help provided" }}</tb>
+                    <td><code>{{ bot.default_prefix }}{{ cmd }} {{ cmd.signature }}</code></tb>
                 </tr>
             {% endfor %}
         {% endfor %}

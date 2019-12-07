@@ -158,11 +158,10 @@ class Events(CustomCog):
         else: # No channels where bot can send messages
             return await guild.leave()
 
-        aidzman = await self.bot.fetch_user(self.bot.owner_id)
         await chnl.send(
             f"Hello residents of **{guild.name}** 👋\n" \
             "It looks like you've been blacklisted from using this bot 😕\n" \
-            f"If you think this is a mistake, please contact `{aidzman}` to undo this ban\n" \
+            f"If you think this is a mistake, please contact `{self.bot.owner}` to undo this ban\n" \
             "I'll just leave now 🚪"
         )
         await guild.leave()

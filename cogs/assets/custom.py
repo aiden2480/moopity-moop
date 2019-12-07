@@ -7,7 +7,7 @@ from subprocess import check_output, CalledProcessError
 from typing import List, Optional
 
 from aiohttp import ClientSession
-from discord import Colour, Embed, Message, Permissions, utils
+from discord import Message, Permissions, User, utils
 from discord.ext import commands
 from cogs.assets import database
 
@@ -72,7 +72,7 @@ class CustomBot(commands.AutoShardedBot):
         self._weblogger.addHandler(stream)
         self._weblogger.addHandler(fileh)
         self._weblogger.setLevel(self.env.get("LOG_LEVEL", 10))
-        self._weblogger.debug("Creating bot object")
+        self.logger.debug("Creating bot object")
 
         # A big 'ol list of emojis
         self.emoji = AttrDict({
@@ -81,9 +81,12 @@ class CustomBot(commands.AutoShardedBot):
             "minecraft": "<:minecraft:582072230574293013>",
             "goldenapple": "<:goldenapple:582083249153638400>",
             "craftingtable": "<:craftingtable:582083249631920128>",
+            "goldingot": "<:goldingot:652065037933871132>",
+            "ironingot": "<:ironingot:652064889602441216>",
+
             # Animated
             "rainbowsheep": "<a:rainbowsheep:582083253544943635>",
-            "minecraftSpin": "<a:minecraftSpin:582107014256263168>",
+            "spinningminecraft": "<a:spinningminecraft:652245643812667433>",
         })
 
     # Redefined class methods
@@ -121,6 +124,14 @@ class CustomBot(commands.AutoShardedBot):
     def cog_load_order(self) -> List[commands.Cog]:
         return sorted(self.cogs.values(), key=lambda c:c.__cog_settings__["loadtime"])
     
+    @property
+    def days_old(self) -> int:
+        return (dt.utcnow()-self.user.created_at).days
+    
+    @property
+    def owner(self) -> User:
+        return self.get_user(self.owner_id)
+    
     def time_between(self, dateone: dt, datetwo: dt) -> str:
         """Find the time between `dateone` and `datetwo` and
         return it in a human readable format fit for discord!\n
@@ -140,7 +151,7 @@ class CustomBot(commands.AutoShardedBot):
         """Find the uptime of the bot (fmt: relative `d`/`h`/`m`/`s`)"""
         return self.time_between(self.startup_time, dt.utcnow())
 
-    def invite_url(self, p: int = 335932480, guildid: int=None) -> str:
+    def invite_url(self, p: int=335932480, guildid: int=None) -> str:
         """Generate an invite URL for the bot
         using the permsisions provided"""
         url = utils.oauth_url(

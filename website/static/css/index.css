@@ -1,0 +1,15 @@
+/* Display showcase, with an image next to some text */
+.feature {
+    font-size: 150%;
+    margin-bottom: 5%;
+}
+.feature img {
+    box-shadow: 0 0 15px 10px #2F3136;
+    border-radius: 6px;
+    height: 300px;
+    width: 45%;
+    object-fit: contain;
+}
+.feature div {
+    margin: 25px;
+}

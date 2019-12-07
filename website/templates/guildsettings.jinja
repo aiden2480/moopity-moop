@@ -4,15 +4,6 @@
 {% block head %}
     <style>
         #settings-saved {color: #27CF93}
-        .guild {display: flex}
-        .guild *:not(img) {margin: 0}
-        .guild img {
-            margin-right: 10px;
-            display: block;
-            border-radius:50%;
-            width:96px;
-            height:96px
-        }
         select {
             border: none;
             background-color: #2F3136;
@@ -37,7 +28,7 @@
 {% block body %}
     {# Guild info block #}
     <br>
-    <div class="guild">
+    <div class="icontext">
         {% if guild.icon %}
             <img alt="{{ guild.name }}'s icon" src="https://cdn.discordapp.com/icons/{{ guild.id }}/{{ guild.icon }}.png"/>
         {% else %}
@@ -63,7 +54,7 @@
 
     <h3>Minecraft role
         <select name="minecraftrole" form="settings" id="minecraftrole">
-            <option value="" style="color: #B9BBBE">Disabled</option>
+            <option value="" style="color: #B9BBBE">❌ Disabled</option>
             {% for role in reversed(guild.roles) %}
                 {% set disabled = "disabled" if role >= guild.me.top_role %}
                 {% set lock, colour = "🔒 " if disabled, "#818386" if disabled else get_role_colour(role) %}
@@ -77,7 +68,7 @@
 
     {# Finally we get to the action form lol #}
     <form method="POST" id="settings">
-        <button id="button" onclick="location.href=location.href;">Cancel</button>
+        <button id="button" onclick="location.search='';return false">Cancel</button>
         <input type="submit" id="button">
         {% if saved %}
             <h3 id="settings-saved" style="display:inline">Your settings have been saved</h3>

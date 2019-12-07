@@ -146,6 +146,7 @@ async def picker(request: web.Request):
 
 @routes.get("/user/{userid}")
 async def userroute(request: web.Request):
+    # TODO: Should I make or delete this?
     return web.Response(text="hi")
 
 

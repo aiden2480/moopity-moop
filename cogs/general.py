@@ -56,7 +56,6 @@ class General(CustomCog):
         """Info and stats about the bot"""
         await ctx.trigger_typing()
         e = Embed(colour=Colour.blue(), description=self.bot.description)
-        aidzman = self.bot.get_user(self.bot.owner_id)
         global_commands = []
         infoo = ""
 
@@ -76,7 +75,7 @@ class General(CustomCog):
             infoo += f"\n{i}"
 
         fields = {
-            "Developer 💻": f"{aidzman}\n{aidzman.id}",
+            "Developer 💻": f"{self.bot.owner}\n{self.bot.owner.id}",
             "Version 🛠": f"Bot version `{self.bot.VERSION}`\nDiscord.py `v{dpy_version}`",
             "Commands 🍰": len(global_commands),
             "Guild count 🛡": len(self.bot.guilds),

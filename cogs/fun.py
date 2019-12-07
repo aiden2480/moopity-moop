@@ -1,6 +1,5 @@
 from asyncio import TimeoutError as AsyncTimeoutError
 from datetime import datetime as dt
-from datetime import timedelta as td
 from html import unescape
 from io import BytesIO
 from random import choice, randint, shuffle
@@ -212,7 +211,7 @@ class Fun(CustomCog):
     @commands.bot_has_permissions(add_reactions=True)
     @commands.cooldown(5, 60, commands.BucketType.user)
     async def ten_secs(self, ctx):
-        """React to the message as close to 10 seconds as you can and win coins!"""
+        """React to the message as close to 10 seconds as you can to win coins!"""
         emoji = str(choice(ctx.guild.emojis+(self.bot.emoji.minecraft,)))
         embed = Embed(description=f"React to this message with {emoji} after exactly 10 seconds", colour=Colour.blue())
         embed.set_author(icon_url=ctx.author.avatar_url, name=f"{ctx.author}'s 10s game")

@@ -34,4 +34,3 @@ Features
 *Get a players `UUID`, username history, skin, or skin texture*
 
 What are you waiting for? *[Invite now!](https://moopity-moop.chocolatejade42.repl.co/invite)*
-

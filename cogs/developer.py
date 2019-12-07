@@ -1,9 +1,9 @@
 from datetime import datetime as dt
-from inspect import getsource, getsourcefile, getsourcelines
+from inspect import getsourcefile, getsourcelines
 from os.path import relpath
 from time import time
 
-from discord import Colour, Embed, Member, User
+from discord import Colour, Embed, User
 from discord.ext import commands
 from cogs.assets.custom import CustomCog
 

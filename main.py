@@ -1,19 +1,19 @@
 # Importing
 from datetime import datetime as dt
 from datetime import timedelta as td
-from random import choice, randint
+from random import choice
 from time import time
 from traceback import format_exception
 from urllib.parse import urlencode
 from warnings import filterwarnings
 
-from aiohttp import web
+from aiohttp import web, __version__ as aio_version
 from aiohttp_jinja2 import get_env as jinja_env
 from aiohttp_jinja2 import setup as jinja_setup
 from aiohttp_session import setup as session_setup
 from aiohttp_session.cookie_storage import EncryptedCookieStorage
 from discord import Activity, AsyncWebhookAdapter, Colour, Embed, Forbidden
-from discord import Game, HTTPException, Message, Status, Webhook
+from discord import Game, HTTPException, Message, Status, Webhook, __version__ as dpy_version
 from discord.ext import commands
 from humanize import naturaltime
 from jinja2 import FileSystemLoader
@@ -103,7 +103,7 @@ async def on_connect():
         activity=Game(name=choice((
             "Minecraft",
             f"{bot.default_prefix}help for commands!",
-            f"created by {await bot.fetch_user(bot.owner_id)}",
+            f"created by {bot.owner}",
             f"{len(bot.users)} users accross {len(bot.guilds)} servers",
     ))))
 
@@ -144,7 +144,6 @@ async def on_command_error(ctx: commands.Context, error):
     error = getattr(error, "original", error)
 
     # Setup response embed
-    aidzman = bot.get_user(bot.owner_id)
     e = Embed(colour=Colour.blue(), timestamp=dt.utcnow())
     e.set_footer(text=bot.user, icon_url=bot.user.avatar_url)
 
@@ -228,7 +227,7 @@ async def on_command_error(ctx: commands.Context, error):
         e.add_field(name="Guild", value=ctx.guild.name) if ctx.guild else None
         e.add_field(name="Channel", value=f"{'#' if ctx.guild else ''}{ctx.channel}")
 
-        if ctx.author == aidzman:
+        if ctx.author == bot.owner:
             return await ctx.send(embed=e)
 
         webhook = Webhook.from_url(bot.env["ERROR_WEBHOOK_URL"], adapter=AsyncWebhookAdapter(bot.session))
@@ -236,10 +235,10 @@ async def on_command_error(ctx: commands.Context, error):
 
         em = Embed(
             color=0xFFA500, timestamp=dt.utcnow(), title="💣 Oof, an error occoured 💥",
-            description=f"Please [join the support guild]({bot.guild_invite_url}) and tell **{aidzman}** what happened to help fix this bug.\n\nError code: {error_code}",
+            description=f"Please [join the support guild]({bot.guild_invite_url}) and tell **{bot.owner}** what happened to help fix this bug.\n\nError code: {error_code}",
         )
 
-        em.set_footer(text=f"< Look for this guy!", icon_url=aidzman.avatar_url)
+        em.set_footer(text=f"< Look for this guy!", icon_url=bot.owner.avatar_url)
         await ctx.send(embed=em)
 
 
@@ -274,9 +273,9 @@ if __name__ == "__main__":
     site.router.add_static("/static", "./website/static")
     site.on_startup.append(web_get_cmd_data)
     env = jinja_env(site)
-    env.globals.update(bot=bot, db=bot.db, app=site)
+    env.globals.update(bot=bot, db=bot.db, app=site, dpy_ver=dpy_version, aio_ver=aio_version)
     env.globals.update(**{i.__name__:i for i in [
-        randint, reversed, len, range, list, dict,
+        reversed, len, range, list, dict, str,
     ]})
 
     # Run the website

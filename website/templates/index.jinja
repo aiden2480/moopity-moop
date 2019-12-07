@@ -1,20 +1,63 @@
 {# Setup #}
 {% extends "_base.jinja" %}
 {% block title %}Home{% endblock title %}
-{# TODO: This index page looks like shit.
-Add stuff that shows Moopity Moop's features, command count, etc.
-#}
+
+{% block head %}
+    <link rel="stylesheet" type="text/css" href="/static/css/index.css"/>
+{% endblock head %}
 
 {# Body content #}
 {% block body %}
-    <h1 style="margin-bottom: 0px">Moopity Moop</h1>
-    <p style="margin-top: none">{{ bot.description }}</p>
+    <div style="margin-bottom: 6%">
+        <h1 style="margin: 0px 0px 0px 0px">MOOPITY MOOP</h1>
+        <em style="font-size: 115%">{{ bot.description }}</em>
+    </div>
 
-    <h2>Features</h2>
-    <img src="/static/images/config.png" alt="Moopity Moop config command" style="width:300px">
-    <p>Over <code>{{ len(bot.commands) }}</code> unique commands</p>
-    <p>A very sophisticated currency system with only two commands: <code>{{ bot.default_prefix }}daily</code> and <code>{{ bot.default_prefix }}steal</code></p>
+    <div class="icontext feature">
+        <img src="/static/images/config.png" alt="Config command screenshot" />
+        <div style="float:right">
+            <h2>CONFIGURATION</h2>
+            <p>A customisable prefix, a role automatically given to users when they start playing Minecraft, and a server IP for automatic pinging, which the bot then sets its nickname to.</p>
+        </div>
+    </div>
 
-    <h2 style="margin-bottom: 0px">Guild settings</h2>
-    <p>Click <a href="/guildpicker">here</a> to change your guild config, such as the <code>Server IP</code>, <code>prefix</code> and <code>Minecraft role</code>.
+    <div class="icontext feature">
+        <div style="float:left">
+            <h2>SERVER INFO</h2>
+            <p>Retrieve stats about a Minecraft server in real time, providing MOTD, latency, and a player count.</p>
+        </div>
+        <img src="/static/images/servercmd.png" alt="Server ping command screenshot" />
+    </div>
+
+    <div class="icontext feature">
+        <img src="/static/images/hypixelcmd.png" alt="Hypixel command screenshot" />
+        <div style="float:right">
+            <h2>PLAYER STATISTICS</h2>
+            <p>Find player data on popular servers such as Hypixel, or the Hive</p>
+        </div>
+    </div>
+
+    <div class="icontext feature">
+        <div style="float:left">
+            <h2>ACCOUNT INFO</h2>
+            <p>Get a players <code>UUID</code>, username history, skin, or skin texture.</p>
+        </div>
+        <img src="/static/images/usercmd.png" alt="User command screenshot" />
+    </div>
+
+    <div class="icontext feature">
+        <img src="/static/images/infocmd.png" alt="Bot info command screenshot" />
+        <div style="float:right">
+            <h2>..AND MUCH MUCH MORE!</h2>
+            <p>Moopity Moop is currently in <code>{{ len(bot.guilds )}}</code> servers and can see a total of <code>{{ len(bot.users) }}</code> users. With over <code>{{ len(bot.commands) }}</code> commands, whats not to love? <a href="/invite">Invite now</a> or view the online commands list <a href="/cmds">here</a>.</p>
+        </div>
+    </div>
+
+    <footer class="icontext">
+        <img style="width:48px;height:48px" src="{{ bot.owner.avatar_url }}" />
+        <div style="float:right;font-size:110%">
+            <p>Made by <code>{{ bot.owner }}</code> in <code>Python</code> using <code>discord.py {{ dpy_ver }}</code> and <code>aiohttp {{ aio_ver }}</code>.</p>
+            <p>The bot was created <code>{{ bot.user.created_at.ctime() }}</code> and is currently <code>{{ bot.days_old }}</code> days old. See the <a href="/about">about page</a> for more info.</p>
+        </div>
+    </footer>
 {% endblock body %}

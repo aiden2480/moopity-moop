@@ -1,13 +1,24 @@
-/* Default styling */
+/* Main generic stylesheet */
 body {
     background-color: #36393F;
-} * {
-    color:#75b9e7;
-    font-family: "Consolas";
-} a {
-    color: #75b9e7;
 }
 
+* {
+    color: #75b9e7;
+    font-family: "Consolas", "Courier New";
+}
+
+footer {
+    background-color: #2F3136;
+    position: absolute;
+    left: 0;
+    width: calc(100% - 40px);
+    padding: 10px 20px;
+}
+
+/* Text */
+h1 {font-size: 300%}
+h1, h2 {color: #00A2E8}
 code {
     padding: 0 5px 0 5px;
     background: #2F3136;
@@ -17,22 +28,17 @@ code {
     font-weight: bold;
 }
 
+/* Buttons */
 button {
-    background-color: #363636;
-    border: 2px solid #75b9e7;
-    color: inherit;
     padding: 8px 16px;
     text-align: center;
     font-size: 16px;
-    margin: 4px 2px;
     cursor: pointer;
-    border-radius: 10px;
 }
 button:hover {
-    border: 2px solid #00A2E8;
     color: #00A2E8;
 }
-/* TODO: Fix the css for the buttons/input so both the buttons on the guild picker and guild settings dont look like shit */
+
 input, button {
     border: none;
     border-bottom: 2px solid #00A2E8;
@@ -52,7 +58,18 @@ input, button {
     color: #EAE0C7;
 }
 
-/* Custom scrollbar (condensed) */
+/* Generic styling for an icon next to some text */
+.icontext {display: flex}
+.icontext *:not(img) {margin: 0}
+.icontext img {
+    margin-right: 10px;
+    display: block;
+    border-radius:50%;
+    width:96px;
+    height:96px;
+}
+
+/* Custom scrollbar */
 ::-webkit-scrollbar {width: 10px}
 ::-webkit-scrollbar-track {background: #36393F}
 ::-webkit-scrollbar-thumb {background: #2F3136}

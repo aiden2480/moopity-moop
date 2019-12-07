@@ -10,6 +10,15 @@
     [ ] Fix up the command descriptions/docs
     [ ] Rip off the help command from https://github.com/nguuuquaaa/Belphegor/blob/master/belphegor/help.py because that was a cool help command
     [ ] Create voter-only commands, maybe worth more coins?
+    [ ] Rename currency to ingots, and create a global ingot emoji
+        [ ] Generic currency is an iron ingot, but "super" currency is a gold ingot
+    
+    [ ] When a new server is set, the bot should immedietly start a task to update/create the pinger
+
+    [ ] Create convertors
+        [ ] Put in `cogs.assets.custom`
+        [ ] Converter to take a Minecraft user
+        [ ] Converter to take a Minecraft server
 
     [ ] Gambling command
         [ ] Slots
@@ -27,7 +36,7 @@
         [ ] Add a command to find the latest Minecraft version, or post on https://minecraft.net
 
 [ ] website
-    [ ] Convert the readme to HTML and make that the homepage ;)
+    [x] Convert the readme to HTML and make that the homepage ;)
     [ ] Consider storing data in `aiohttp-session-file` instead of `aiohttp-session` EncryptedCookieStorage?
     [x] Replace All references of `Guild` with `Server` in the front-end scripts
     [x] Make an API for voting and the like?
@@ -37,6 +46,7 @@
 [ ] database
     [ ] Consider moving to Google Firebase
         [ ] Advantages include constant syncing
+    [ ] Able to set it so that only the set minecraft server may be pinged by the bot
 
 [x] listing sites
     [x] Create a global Markdown bot description that can be used on bot listing sites
