@@ -42,9 +42,8 @@ class CustomBot(commands.AutoShardedBot):
         self.startup_time = dt.utcnow()  # Store bot startup time
         self.default_prefix = "m!" if not self.development else "." # Yayeet
         self.delete_data_on_remove = True if self.env.get("DELETE_DATA_ON_REMOVE", "False").upper() == "TRUE" else False
-        self.website_url = "https://moopity-moop.chocolatejade42.repl.co" if not self.development else "http://localhost:8080"
+        self.website_url = "https://moopitymoop.tk" if not self.development else "http://localhost:8080"
         self.oauth_callback = f"{self.website_url}/login"
-        self.database_ready = False
         
         try: self.VERSION = check_output("git describe --tags --always", shell=True).decode().strip()
         except CalledProcessError: self.VERSION = "Latest"
@@ -88,6 +87,7 @@ class CustomBot(commands.AutoShardedBot):
             "rainbowsheep": "<a:rainbowsheep:582083253544943635>",
             "spinningminecraft": "<a:spinningminecraft:652245643812667433>",
         })
+        self.ingot = self.emoji.ironingot # Shortcut
 
     # Redefined class methods
     def run(self, *args, **kwargs) -> None:
@@ -129,6 +129,12 @@ class CustomBot(commands.AutoShardedBot):
         return (dt.utcnow()-self.user.created_at).days
     
     @property
+    def created_at(self) -> dt:
+        if self.user is None:
+            return dt.utcnow()
+        return self.user.created_at
+    
+    @property
     def owner(self) -> User:
         return self.get_user(self.owner_id)
     
@@ -147,7 +153,8 @@ class CustomBot(commands.AutoShardedBot):
         uptime = [f"{i} {key[u]}" for u, i in enumerate(ut) if i != 0]
         return uptime[0] if len(uptime) == 1 else ", ".join(uptime[:-1]) + " and " + uptime[-1]
 
-    def get_uptime(self) -> str:
+    @property
+    def uptime(self) -> str:
         """Find the uptime of the bot (fmt: relative `d`/`h`/`m`/`s`)"""
         return self.time_between(self.startup_time, dt.utcnow())
 
@@ -166,6 +173,7 @@ class CustomCog(commands.Cog):
     def __init__(self, cog: commands.Cog):
         """Creates an instance of a regular cog, with a few extra things I might want"""
         cog.logger = getLogger(f"bot.cogs.{cog.qualified_name.lower()}")
+
 
 # How about custom ctx, while we're at it
 class CustomContext(commands.Context):

@@ -13,9 +13,14 @@ class Developer(CustomCog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+    
+    async def cog_before_invoke(self, ctx):
+        """These are dev only commands"""
+        # TODO: Move source out of dev only lmao
+        if ctx.author.id != ctx.bot.owner_id:
+            raise commands.NotOwner()
 
     @commands.command(aliases=["rld"])
-    @commands.is_owner()
     async def reload(self, ctx, *cogs):
         """Reload cogs on the bot\n
         If param `cogs` is empty, all cogs will be reloaded 👍"""
@@ -60,36 +65,31 @@ class Developer(CustomCog):
         e.description = f"Finished reloading `{len(cogs)}` cogs in `{round((time()-start_time)*1000)}`ms ⚙"
         await msg.edit(embed=e)
 
-    @commands.command(hidden=True)
-    async def source(self, ctx, *, command: str = None):
+    @commands.command()
+    async def source(self, ctx, *, command: str=None):
         """Displays my full source code or for a specific command."""
-        source_url = "https://github.com/aiden2480/moopity-moop"
-        if command is None:
-            return await ctx.send(source_url)
+        source = "https://github.com/aiden2480/moopity-moop"
 
-        if command == "help":
-            src = type(self.bot.help_command)
-            module = src.__module__
-            filename = getsourcefile(src)
-        else:
-            obj = self.bot.get_command(command.replace(".", " "))
-            if obj is None:
-                return await ctx.send("Couldn't find command.")
+        if command in [None, "help"]:
+            return await ctx.send(source)
+        
+        obj = self.bot.get_command(command)        
+        if obj is None:
+            return await ctx.send(f"Couldn't find that command 😕\n{source}")
 
-            src = obj.callback.__code__
-            module = obj.callback.__module__
-            filename = src.co_filename
+        src = obj.callback.__code__
+        module = obj.callback.__module__
+        filename = src.co_filename
 
-        if any([module.startswith(m) for m in ["discord", "jishaku"]]):
-            return await ctx.send(source_url)
+        if module.startswith("discord") or module.startswith("jishaku"):
+            return await ctx.send(source)
 
         lines, firstlineno = getsourcelines(src)
         location = relpath(filename).replace("\\", "/")
-        final_url = f"{source_url}/blob/master/{location}#L{firstlineno}-L{firstlineno+len(lines)-1}"
+        final_url = f"{source}/blob/master/{location}#L{firstlineno}-L{firstlineno+len(lines)-1}"
         await ctx.send(final_url)
     
     @commands.command()
-    @commands.is_owner()
     async def reset(self, ctx, mbr: commands.Greedy[User]=None, *commands):
         """Reset cooldowns"""
         mbr = [ctx.author] or mbr

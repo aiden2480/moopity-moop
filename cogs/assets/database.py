@@ -4,7 +4,6 @@ from os import getenv
 
 from discord import Message
 from discord.ext import commands
-jsonstore.DEFAULT_TIMEOUT_SECONDS = 15
 
 class Database(object):
     LEADERBOARD_EMOJI_KEY = {1: "👑", 2: "🔱", 3: "🏆"}
@@ -17,13 +16,17 @@ class Database(object):
         self.guild_minecraft_roles = dict()
         self.guild_server_ips = dict()
         get_event_loop().run_until_complete(self.update_cache())
+    
+    @property
+    def ready(self) -> bool:
+        return self.cache is not dict()
 
     # Upkeep stuff
     async def update_cache(self):
         """Updates the internal cache with the
         data that is stored in the remote host
         This should prevent API abuse and lag"""
-        self.cache = await self.client.get("") or dict()
+        self.cache = await self.client.get("", timeout=15) or dict()
         self.guild_minecraft_roles = {
             g: self.cache["guilds"][g]["role"]
             for g in self.cache["guilds"]

@@ -57,7 +57,7 @@
         <img style="width:48px;height:48px" src="{{ bot.owner.avatar_url }}" />
         <div style="float:right;font-size:110%">
             <p>Made by <code>{{ bot.owner }}</code> in <code>Python</code> using <code>discord.py {{ dpy_ver }}</code> and <code>aiohttp {{ aio_ver }}</code>.</p>
-            <p>The bot was created <code>{{ bot.user.created_at.ctime() }}</code> and is currently <code>{{ bot.days_old }}</code> days old. See the <a href="/about">about page</a> for more info.</p>
+            <p>The bot was created <code>{{ bot.created_at.ctime() }}</code> and is currently <code>{{ bot.days_old }}</code> days old. See the <a href="/about">about page</a> for more info.</p>
         </div>
     </footer>
 {% endblock body %}

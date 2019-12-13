@@ -1,4 +1,5 @@
 from datetime import datetime as dt, timedelta as td
+from time import perf_counter
 
 from discord import Colour, Embed
 from discord import __version__ as dpy_version
@@ -46,7 +47,7 @@ class General(CustomCog):
         """Pong!"""
         await ctx.send(embed=Embed(
             colour=Colour.blue(),
-            description=f":ping_pong: Pong! `{round(self.bot.latency*1000, 2)}ms` :ping_pong:",
+            description=f":ping_pong: Pong! `{self.bot.latency*1000:.2f}ms` :ping_pong:",
         ))
 
     @commands.command(aliases=["about", "botinfo", "stats"])
@@ -86,7 +87,7 @@ class General(CustomCog):
         e.add_field(name="Last updates", value=infoo, inline=False)
         for field in fields:
             e.add_field(name=field, value=fields[field])
-        e.add_field(name="Uptime 🤖", value=self.bot.get_uptime(), inline=False)
+        e.add_field(name="Uptime 🤖", value=self.bot.uptime, inline=False)
         e.set_author(name=self.bot.user, icon_url=self.bot.user.avatar_url)
         await ctx.send(embed=e)
 
@@ -117,7 +118,7 @@ class General(CustomCog):
         """Shows bot list voting pages for the bot"""
         embed = Embed(colour=Colour.blue(), description="", timestamp=ctx.message.created_at)
         embed.set_author(name=f"{self.bot.user}'s voting links", icon_url=self.bot.user.avatar_url)
-        embed.set_footer(text=f"Each vote will gain you $40 ({ctx.clean_prefix}bal)")
+        embed.set_footer(text=f"Each vote will gain you 40 ingots ({ctx.clean_prefix}bal)")
         
         embed.description += "<:logo:459634405183586304> [Divine Discord Bots](https://divinediscordbots.com/bot/567246604411863041/vote)"
         await ctx.send(embed=embed)
@@ -127,7 +128,7 @@ class General(CustomCog):
         """Shows how long the bot has been online"""
         await ctx.send(embed=Embed(
             colour=Colour.blue(),
-            description=f"I have been online for `{self.bot.get_uptime()}` 🤖",
+            description=f"I have been online for `{self.bot.uptime}` 🤖",
         ))
 
 

@@ -1,4 +1,4 @@
-from typing import List
+from typing import Set
 
 from discord import Guild
 from discord.ext import commands, tasks
@@ -82,13 +82,13 @@ class ServerStatus(CustomCog):
         super().__init__(self)
         self.bot = bot
         self.db = bot.db
-        self.tasks: List[Checker] = list()
+        self.tasks: Set[Checker] = set()
     
     @commands.Cog.listener()
     async def on_ready(self):
-        while not self.bot.database_ready:
+        while not self.db.ready:
             pass
-        if self.tasks != list():
+        if self.tasks != set():
             return # Tasks already loaded
         
         self.logger.debug(f"{self.__class__.__name__!r} cog ready, loading checkers")
@@ -104,7 +104,7 @@ class ServerStatus(CustomCog):
     def create_task(self, guildid: int, serverip: str):
         """Creates a task"""
         tsk = Checker(self.bot, guildid, serverip)
-        self.tasks.append(tsk)
+        self.tasks.add(tsk)
         return tsk
     
     def stop_task(self, guildid: int):

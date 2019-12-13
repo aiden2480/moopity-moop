@@ -24,7 +24,7 @@
         {# Gotta have a navbar! #}
     	<div class="navbar">
             <a href="/">
-			    <img src="/static/images/moopitymoop.png" alt="Moopity Moop icon" id="moopicon">
+			    <img src="/static/images/moopitymoop.png" alt="Moopity Moop icon" id="moopicon" />
 			</a>
 			<a href="/about" class="link">About</a>
 			<a href="/cmds" class="link">Commands</a>
@@ -48,21 +48,14 @@
                 <div class="progress-bar" id="myBar"></div>
             </div>
 		</div>
-        <div style="height: 42px"></div>
+        <div id="nav-block"></div>
         
         {% block body %}
             {# Code for 404 because it is otherwise redefined #}
-            
             <style>
-                .center-div p {
-                    float: left;
-                } .center-div p img {
-                    width: 130px; height: 130px;
-                    border-radius: 50%;
-                }
-                .center-div *{
-                    color: #2F3136;
-                }
+                .center-div p {float: left}
+                .center-div p img {width: 130px; height: 130px; border-radius: 50%}
+                .center-div * {color: #2F3136}
             </style>
 
             <div class="center-div">
@@ -73,6 +66,9 @@
         {% endblock body %}
 
         <script>
+            // Nav block
+            document.getElementById("nav-block").style.height=`${document.getElementsByClassName("navbar")[0].scrollHeight}px`;
+
             // Controls our custom scrollbar
             window.onscroll = function() {
                 var winScroll = document.body.scrollTop || document.documentElement.scrollTop;

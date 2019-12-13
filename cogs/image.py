@@ -1,7 +1,8 @@
 from io import BytesIO
 from urllib.parse import urlencode
+from typing import Optional
 
-from discord import Embed, Colour, File
+from discord import Embed, Colour, File, Member
 from discord.ext import commands
 from cogs.assets.custom import CustomCog
 
@@ -58,6 +59,7 @@ class Image(CustomCog):
         await ctx.send(embed=embed)
     
     @commands.command()
+    @commands.cooldown(3, 5, commands.BucketType.user)
     async def achievement(self, ctx, *, msg=""):
         """Create an achievement in the Minecraft format"""
         args = msg.split("|", maxsplit=2)
@@ -73,6 +75,14 @@ class Image(CustomCog):
         async with self.sess.get(f"https://minecraftskinstealer.com/achievement/{conv.get(icon)}/{title}/{descrip}") as resp:
             file=File(BytesIO(await resp.content.read()), filename="achievement.png")
             await ctx.send(file=file)
+
+    @commands.command()
+    @commands.cooldown(3, 5, commands.BucketType.user)
+    async def trigger(self, ctx, user: Optional[Member]):
+        """Trigger a user"""
+        user = user or ctx.author
+        await ctx.trigger_typing()
+        await ctx.send(embed=Embed(colour=Colour.blue()).set_image(url=f"{BASE_URL}/triggered.gif?url={user.avatar_url}"))
 
 
 def setup(bot: commands.Bot):

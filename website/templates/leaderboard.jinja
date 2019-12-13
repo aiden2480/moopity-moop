@@ -70,11 +70,16 @@
 
             <div style="float:right">
                 <h3>{{ user }}</h3>
-                <h3>Rank <code>#{{ list(data.keys()).index(id_)+1 }}</code> with <code>${{ amount }}</code></h3>
+                <h3>Rank 
+                    <code>#{{ list(data.keys()).index(id_)+1 }}</code>
+                    with
+                    <code>{{ amount }}</code>
+                    <img src="https://cdn.discordapp.com/emojis/652064889602441216.png?v=1" style="display:inline; border-radius:0%; width:24px; height:24px; position:relative; top:4px; right:4px" />
+                </h3>
             </div>
         </div>
     {% else %}
-        <p>It seems that literally everybody in this server has no money whatsoever. Use the <code>{{ bot.default_prefix }}daily</code> command to get started</p>
+        <p>It seems that literally everybody in this server has no ingots whatsoever. Use the <code>{{ bot.default_prefix }}daily</code> command to get started</p>
     {% endfor %}
     </div>
 {% endblock body %}

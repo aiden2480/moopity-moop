@@ -1,7 +1,7 @@
 from logging import getLogger
 
 from aiohttp import ClientSession, web
-from aiohttp_jinja2 import template, get_env as jinja_env
+from aiohttp_jinja2 import template, render_template, get_env as jinja_env
 from aiohttp_session import get_session, new_session
 
 # Create objects
@@ -219,9 +219,9 @@ async def guildsettings_backend(request: web.Request):
 async def support(request: web.Request):
     return web.HTTPFound(request.app["bot"].guild_invite_url)
 
+
 # Middlewares
 @web.middleware
-@template("_base.jinja")
 async def mw_not_found(request, handler):
     """A custom 404 status page"""
     try:
@@ -231,8 +231,7 @@ async def mw_not_found(request, handler):
     except web.HTTPException as ex:
         if ex.status != 404:
             raise
-    return dict()
-
+    return render_template("_base.jinja", request, {})
 
 @web.middleware
 async def mw_update_globals(request, handler):
@@ -243,19 +242,17 @@ async def mw_update_globals(request, handler):
     env.globals.update(request=request, session=sess)
     return await handler(request)
 
-
 @web.middleware
 async def mw_bot_ready(request, handler):
     """Wait until the bot is ready before dispatching
     the first request. Some of the website stuff
     depends on the bot's internal cache being ready"""
-    await request.app["bot"].wait_until_ready()
+    if not request.app["bot"].is_ready():
+        return web.HTTPClientError(text="Error 425 Website is still booting up\nPlease try again in about 30 seconds")
     return await handler(request)
 
-
 # TODO: The 404 page no longer works scam
-#middlewares = [mw_not_found, mw_bot_ready, mw_update_globals]
-middlewares = [mw_update_globals]
+middlewares = [mw_bot_ready, mw_update_globals]
 
 # Other functions
 async def web_get_cmd_data(app: web.Application):

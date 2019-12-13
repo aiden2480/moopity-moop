@@ -35,7 +35,10 @@ async def divinediscordbotscom(request: Request):
     await db.add_user_money(user.id, 40)
     bal = await db.get_user_money(user.id)
 
-    embed = Embed(colour=Colour.blue(), description=f"Thanks for upvoting on [Divine Discord Bots](https://divinediscordbots.com/bot/567246604411863041)\nHave a free `$40` for upvoting 😁💰\nYour balance is now `${bal}`")
+    embed = Embed(
+        colour=Colour.blue(), title=f"{bot.emoji.spinningminecraft} Thanks for upvoting!",
+        description=f"Have a free **25 {bot.ingot}** and **3 {bot.emoji.goldingot}**\nYour balance is now **{bal} {bot.ingot}**"
+    )
     embed.set_footer(text=bot.user, icon_url=bot.user.avatar_url)
     
     try: await user.send(embed=embed)

@@ -18,7 +18,7 @@ GLITCH_ALL = "".join((chr(i) for i in range(0x300, 0x370))) + "".join((chr(i) fo
 class Fun(CustomCog):
     """Fun commands such as games and special features
     Some have absolutely nothing to do with Minecraft! yay!"""
-    # TODO: Make a cog listener that gives user money for using the commands
+    # TODO: Make a cog listener that gives user ingots for using the commands
 
     def __init__(self, bot: commands.Bot):
         super().__init__(self)
@@ -191,7 +191,7 @@ class Fun(CustomCog):
 
         if str(reaction.emoji) == correct_emoji:
             await ctx.react(message, "🎉")
-            await ctx.send(f"🎉 Correct, big brain! You earned yourself `{worth}` coins!")
+            await ctx.send(f"🎉 Correct, big brain! You earned yourself `{worth}` iron ingots!")
             await self.db.add_user_money(ctx.author.id, worth)
         else:
             await ctx.react(message, "😕")
@@ -211,7 +211,7 @@ class Fun(CustomCog):
     @commands.bot_has_permissions(add_reactions=True)
     @commands.cooldown(5, 60, commands.BucketType.user)
     async def ten_secs(self, ctx):
-        """React to the message as close to 10 seconds as you can to win coins!"""
+        """React to the message as close to 10 seconds as you can to win ingots!"""
         emoji = str(choice(ctx.guild.emojis+(self.bot.emoji.minecraft,)))
         embed = Embed(description=f"React to this message with {emoji} after exactly 10 seconds", colour=Colour.blue())
         embed.set_author(icon_url=ctx.author.avatar_url, name=f"{ctx.author}'s 10s game")
@@ -236,7 +236,7 @@ class Fun(CustomCog):
             ====================
             < time   = "{endstr}s" >
             < off by = "{diff:.2f}s" >
-            < coins  = "{coins} net" >
+            < ingots = "{coins} net" >
         ```""".splitlines())
         await msg.edit(embed=embed)
         await self.db.add_user_money(ctx.author.id, coins)

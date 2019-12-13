@@ -58,7 +58,7 @@ async def on_ready():
     if hasattr(bot, "ready_time"):
         return
     bot.ready_time = dt.utcnow()
-    bot.logger.info("Bot ready - {0.name!r} ({0.id})".format(bot.user))
+    bot.logger.info("Bot ready - {0.name!r} ({0.id}). Loaded in {1}".format(bot.user, bot.uptime))
 
     # Update env on site
     env = jinja_env(site)
@@ -79,10 +79,7 @@ async def on_ready():
 
     # Announce our presence to the whole wide world
     webhook = Webhook.from_url(bot.env["COMMANDS_WEBHOOK_URL"], adapter=AsyncWebhookAdapter(bot.session))
-    e = Embed(
-        colour=0x00B7D9, timestamp=dt.utcnow(),
-        description=f"Time taken to load: `{bot.get_uptime()}`",
-    )
+    e = Embed(colour=0x00B7D9, timestamp=dt.utcnow(), description=f"Time taken to load: `{bot.uptime}`")
 
     e.set_footer(text=bot.user)
     e.set_author(name="Bot restarted", icon_url="https://bit.ly/2Sd33Wx")
@@ -92,19 +89,15 @@ async def on_ready():
 @bot.event
 async def on_connect():
     await bot.db.update_cache()
-    bot.database_ready = True
 
     bot.logger.info(f"Bot reconnected at {dt.now():%H:%M:%S}")
     bot.logger.info("Database ready")
 
-    await bot.change_presence(
-        status=Status.online,
-        afk=False,
-        activity=Game(name=choice((
-            "Minecraft",
-            f"{bot.default_prefix}help for commands!",
-            f"created by {bot.owner}",
-            f"{len(bot.users)} users accross {len(bot.guilds)} servers",
+    await bot.change_presence(status=Status.online, afk=False, activity=Game(name=choice((
+        "Minecraft",
+        f"{bot.default_prefix}help for commands!",
+        f"created by {bot.owner}",
+        f"{len(bot.users)} users accross {len(bot.guilds)} servers",
     ))))
 
 
