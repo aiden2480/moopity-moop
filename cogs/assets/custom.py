@@ -42,7 +42,7 @@ class CustomBot(commands.AutoShardedBot):
         self.startup_time = dt.utcnow()  # Store bot startup time
         self.default_prefix = "m!" if not self.development else "." # Yayeet
         self.delete_data_on_remove = True if self.env.get("DELETE_DATA_ON_REMOVE", "False").upper() == "TRUE" else False
-        self.website_url = "https://moopitymoop.tk" if not self.development else "http://localhost:8080"
+        self.website_url = "https://www.moopitymoop.tk" if not self.development else "http://localhost:8080"
         self.oauth_callback = f"{self.website_url}/login"
         
         try: self.VERSION = check_output("git describe --tags --always", shell=True).decode().strip()

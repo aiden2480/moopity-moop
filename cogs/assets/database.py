@@ -157,7 +157,7 @@ class Database(object):
     # Currency
     async def set_user_money(self, userid: int, amount: int):
         amount = amount if amount >= 0 else 0
-        return await self.save(f"users/{userid}/money")
+        return await self.save(f"users/{userid}/money", amount)
 
     async def get_user_money(self, userid: int, *, human_readable=True):
         """`human_readable` specefies if the bot should add in commas every
