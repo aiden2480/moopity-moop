@@ -5,7 +5,6 @@ from random import choice
 from time import time
 from traceback import format_exception
 from urllib.parse import urlencode
-from warnings import filterwarnings
 
 from aiohttp import web, __version__ as aio_version
 from aiohttp_jinja2 import get_env as jinja_env
@@ -17,7 +16,6 @@ from discord import Game, HTTPException, Message, Status, Webhook, __version__ a
 from discord.ext import commands
 from humanize import naturaltime
 from jinja2 import FileSystemLoader
-from json_store_client import EmptyResponseWarning
 from logging import getLogger
 
 from cogs.assets.custom import CustomBot
@@ -189,13 +187,13 @@ async def on_command_error(ctx: commands.Context, error):
     elif isinstance(error, commands.MissingPermissions):
         perms = [perm.replace("_", " ").replace("guild", "server").title() for perm in error.missing_perms]
         e.title = "You're missing permissions!"
-        e.description = f"You can't run this command :angry: Come back when you have the following permissions:\n{', '.join(perms)}"
+        e.description = f"You can't run this command 😠 Come back when you have the following permissions:\n{', '.join(perms)}"
         await ctx.send(embed=e)
     elif isinstance(error, commands.BotMissingPermissions):
         perms = [perm.replace("_", " ").replace("guild", "server").title() for perm in error.missing_perms]
         e.title = "I'm missing permissions!"
         e.description = f"I need the following permissions to execute this command:\n{', '.join(perms)}"
-        
+
         try: await ctx.send(embed=e)
         except Forbidden: # Can't send embeds
             try: await ctx.send(e.description) # Can't send messages
@@ -214,7 +212,7 @@ async def on_command_error(ctx: commands.Context, error):
 
         e.color = 0xFB8F02
         e.description = f"```py\n{formatted}```"
-        e.set_author(name="An error occoured", icon_url="https://bit.ly/2JHJ91I")
+        e.set_author(name="An error occoured", icon_url="https://i.imgur.com/CyIvvaJ.jpg")
         e.add_field(name="User", value=f"{ctx.author}\n{ctx.author.id}")
         e.add_field(name="Error code", value=error_code)
         e.add_field(name="Guild", value=ctx.guild.name) if ctx.guild else None
@@ -224,11 +222,11 @@ async def on_command_error(ctx: commands.Context, error):
             return await ctx.send(embed=e)
 
         webhook = Webhook.from_url(bot.env["ERROR_WEBHOOK_URL"], adapter=AsyncWebhookAdapter(bot.session))
-        await webhook.send(embed=e, username=bot.user.name, avatar_url=bot.user.avatar_url)
+        msg=await webhook.send(embed=e, username=bot.user.name, avatar_url=bot.user.avatar_url)
 
         em = Embed(
             color=0xFFA500, timestamp=dt.utcnow(), title="💣 Oof, an error occoured 💥",
-            description=f"Please [join the support guild]({bot.guild_invite_url}) and tell **{bot.owner}** what happened to help fix this bug.\n\nError code: {error_code}",
+            description=f"Please [join the support guild]({bot.guild_invite_url}) and tell **{bot.owner}** what happened to help fix this bug.\n\nError code: {error_code} [Jump URL]({msg.jump_url})",
         )
 
         em.set_footer(text=f"< Look for this guy!", icon_url=bot.owner.avatar_url)
@@ -256,7 +254,6 @@ if __name__ == "__main__":
     bot.logger.debug("Cogs loaded")
 
     # Warnings
-    filterwarnings("ignore", category=EmptyResponseWarning)
     [bot.logger.warning(f"Disabled command `{cmd!s}` found in cog `{cmd.cog.qualified_name}`") for cmd in bot.walk_commands() if not cmd.enabled]
     [bot.logger.warning(f"Command `{cmd!s}` found in cog `{cmd.cog.qualified_name}` has no help text!") for cmd in bot.commands if cmd.help is None]
 

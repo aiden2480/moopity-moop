@@ -1,177 +1,173 @@
-import json_store_client as jsonstore
 from asyncio import get_event_loop
 from os import getenv
 
+from aiohttp import ClientSession
 from discord import Message
 from discord.ext import commands
+from json import dumps
+
 
 class Database(object):
+    """
+        Represents a database connection
+
+        This stores the data in a read-only cache property (`cache`).
+        Internal methods can also be used as shortcuts for updating data quickly
+    """
+    TIMEOUT = 5
+    
     LEADERBOARD_EMOJI_KEY = {1: "👑", 2: "🔱", 3: "🏆"}
-    LEADERBOARD_DEFAULT_EMOJI = "🎗"
     LEADERBOARD_URL_KEY = {1:"98fe9cdec2bf8ded782a7bf1e302b664", 2:"7d7c9561cc5ab5259ff8023b8ef86c99", 3:"0a00e865c445d42dfb9f64bedfab8cf8"}
+    
+    LEADERBOARD_DEFAULT_EMOJI = "🎗"
     LEADERBOARD_DEFAULT_URL = "d702f2335a85d421e708bc9466571fa8"
 
-    def __init__(self, url: str = getenv("DATABASE_URL")):
-        self.client = jsonstore.AsyncClient(url)
-        self.guild_minecraft_roles = dict()
+    # Setup functions
+    def __init__(self, url:str=getenv("DATABASE_URL"), *, timeout:int=TIMEOUT, sess:ClientSession=None):
+        self.__url = url
+        self.TIMEOUT = timeout
+
+        self._cache = dict()
         self.guild_server_ips = dict()
-        get_event_loop().run_until_complete(self.update_cache())
+        self.guild_minecraft_roles = dict()
+        
+        self.sess = sess if isinstance(sess, ClientSession) else get_event_loop().run_until_complete(self.__create_session())
     
+    async def __create_session(self) -> ClientSession:
+        return ClientSession(headers={
+            "Accept": "application/json",
+            "Content-type": "application/json",
+        })
+    
+    # Properties
     @property
     def ready(self) -> bool:
-        return self.cache is not dict()
+        """Indicates if the internal cache is ready"""
+        return self._cache is not dict()
+    
+    @property
+    def cache(self) -> dict:
+        return self._cache
 
-    # Upkeep stuff
-    async def update_cache(self):
-        """Updates the internal cache with the
-        data that is stored in the remote host
-        This should prevent API abuse and lag"""
-        self.cache = await self.client.get("", timeout=15) or dict()
+    # Get/set functions
+    async def update_cache(self) -> "cache":
+        """
+            Updates the internal cache with the data that is stored in the remote host.
+            This should prevent API abuse and lag by requesting data all the time.
+        """
+        self._cache = await self.get("") or dict()
         self.guild_minecraft_roles = {
-            g: self.cache["guilds"][g]["role"]
-            for g in self.cache["guilds"]
-            if self.cache["guilds"][g].get("role")
-        } if self.cache.get("guilds") else dict()
+            g: self._cache["guilds"][g]["role"]
+            for g in self._cache["guilds"]
+            if self._cache["guilds"][g].get("role")
+        } if self._cache.get("guilds") else dict()
         self.guild_server_ips = {
-            g: self.cache["guilds"][g]["minecraft"]
-            for g in self.cache["guilds"]
-            if self.cache["guilds"][g].get("minecraft")
-        } if self.cache.get("guilds") else dict()
+            g: self._cache["guilds"][g]["minecraft"]
+            for g in self._cache["guilds"]
+            if self._cache["guilds"][g].get("minecraft")
+        } if self._cache.get("guilds") else dict()
+        return self._cache
 
-    # Testing these two
-    async def get(self, key: str, default=None):
-        lol = [i for i in key.split("/") if i]
-        d = self.cache.get(lol[0])
-        use_default = default == None
+    async def get(self, key: str, default=None, *, data=None):
+        """
+            Get a value from the database cache, using a key in the format `one/two`, etc.
+            If a `default` is supplied, that will be returned if a value could not be resolved.
+            Do not supply the `data` paramater, this is used by the internal operations.
+        """
+        data = data or self._cache
+        args = key.split("/")
 
-        for sub in lol:
-            if sub != lol[0]:
-                if d:
-                    d = d.get(sub)
-        return (d or default) if use_default else d
+        if args and data:
+            element = args[0]
+            if element:
+                value = data.get(element)
+                return value if len(args) == 1 else await self.get("/".join(args[1:]), default, data=value)
+            else: return default # Invalid key, return default
+        else: # No key/data supplied, get all
+            async with self.sess.get(self.__url) as resp:
+                return (await resp.json())["result"]
 
-    async def save(self, key: str, data=None):
+    async def save(self, key: str, data: any):
+        url = f"{self.__url}/{key}"
         if bool(data):
-            await self.client.save(key, data)
-        else:
-            await self.client.delete(key)
+            async with self.sess.post(url, json=data, timeout=self.TIMEOUT) as resp:
+                resp.raise_for_status()
+            return await self.update_cache()
+        await self.delete(key)
+    
+    async def delete(self, key: str):
+        url = f"{self.__url}/{key}"
+        async with self.sess.delete(url, timeout=self.TIMEOUT) as resp:
+            resp.raise_for_status()
         await self.update_cache()
 
+    # Thanos snap data
     async def double_thanos(self, data="none"):
-        """Double Thanos snaps all the data in the database.\n
-        Technically this would only remove three quarters of the
-        data but shut up boomer what would you know\n
+        """
+            Double Thanos snaps all the data in the database.
         
-        :param:`data` must be either `all`, `guild`, or `user`, representing
-        what data to delete, otherwise it'll delete none lmao"""
+            `data` must be either `all`, `guild`, or `user`,
+            representing what data to delete, otherwise it'll delete none lmao
+        """
         if data == "all":
-            await self.client.delete("")
+            await self.delete("")
         if data in ["guild", "guilds"]:
-            await self.client.delete("guilds")
+            await self.delete("guilds")
         if data in ["user", "users"]:
-            await self.client.delete("users")
+            await self.delete("users")
         await self.update_cache()
 
     async def delete_guild(self, guildid: int):
-        await self.client.delete(f"guilds/{guildid}")
-        await self.update_cache()
+        await self.delete(f"guilds/{guildid}")
 
     async def delete_user(self, userid: int):
-        await self.client.delete(f"users/{userid}")
-        await self.update_cache()
+        await self.delete(f"users/{userid}")
 
     # Blacklisting
-    async def blacklist_guild(self, guildid: int, reason=""):
-        r = reason or "No reason provided"
-        await self.client.save(f"blacklist/guilds/{guildid}", r)
-        await self.update_cache()
+    async def blacklist_guild(self, guildid: int, reason="No reason provided"):
+        return await self.save(f"blacklist/guilds/{guildid}", reason)
 
     async def unblacklist_guild(self, guildid: int):
-        await self.client.delete(f"blacklist/guilds/{guildid}")
-        await self.update_cache()
+        return await self.delete(f"blacklist/guilds/{guildid}")
 
     async def is_guild_blacklisted(self, guildid: int):
-        blist = self.cache.get("blacklist")
-        if blist:
-            guilds = blist.get("guilds")
-            if guilds:
-                if str(guildid) in guilds.keys():
-                    return True
-        return False
+        return bool(await self.get(f"blacklist/guilds/{guildid}"))
 
     # Guild prefixes
     async def set_guild_prefix(self, guildid: int, prefix: str):
-        if bool(prefix):
-            await self.client.save(f"guilds/{guildid}/prefix", prefix)
-        else:
-            await self.client.delete(f"guilds/{guildid}/prefix")
-        await self.update_cache()
+        return await self.save(f"guilds/{guildid}/prefix", prefix)
 
     async def get_guild_prefix(self, guildid: int):
-        guilds = self.cache.get("guilds")
-        if guilds:
-            guild = guilds.get(str(guildid))
-            if guild:
-                return guild.get("prefix", None)
-        return None
-        # return await self.client.get(f"guilds/{guildid}/prefix")
+        return await self.get(f"guilds/{guildid}/prefix", None)
 
     # Guild server IPs
     async def set_minecraft_server(self, guildid: int, serverip: str):
-        if bool(serverip):
-            await self.client.save(f"guilds/{guildid}/minecraft", serverip)
-        else:
-            await self.client.delete(f"guilds/{guildid}/minecraft")
-        await self.update_cache()
+        return await self.save(f"guilds/{guildid}/minecraft", serverip)
 
     async def get_minecraft_server(self, guildid: int):
-        guilds = self.cache.get("guilds")
-        if guilds:
-            guild = guilds.get(str(guildid))
-            if guild:
-                return guild.get("minecraft", None)
-        return None
-        # return await self.client.get(f"guilds/{guildid}/minecraft")
+        return await self.get(f"guilds/{guildid}/minecraft")
 
     # Guild minecraft role
     async def set_minecraft_role(self, guildid: int, roleid: int):
-        if bool(roleid):
-            await self.client.save(f"guilds/{guildid}/role", str(roleid))
-        else:
-            await self.client.delete(f"guilds/{guildid}/role")
-        await self.update_cache()
+        return await self.save(f"guilds/{guildid}/role", str(roleid))
 
     async def get_minecraft_role(self, guildid: int):
-        guilds = self.cache.get("guilds")
-        if guilds:
-            guild = guilds.get(str(guildid))
-            if guild:
-                return int(guild.get("role", 0))
-        return 0
+        return await self.get(f"guilds/{guildid}/role")
 
     # Currency
     async def set_user_money(self, userid: int, amount: int):
-        if bool(amount):
-            await self.client.save(f"users/{userid}/money", amount)
-        else:
-            await self.client.delete(f"users/{userid}/money")
-        await self.update_cache()
+        amount = amount if amount >= 0 else 0
+        return await self.save(f"users/{userid}/money")
 
     async def get_user_money(self, userid: int, *, human_readable=True):
         """`human_readable` specefies if the bot should add in commas every
         three characters, which creates an `str` object instead of an `int`"""
-        usrs = self.cache.get("users")
-        d = 0
-        if usrs:
-            usr = usrs.get(str(userid))
-            if usr:
-                d = usr.get("money", 0)
+        d = await self.get(f"users/{userid}/money")
         return f"{d:,}" if human_readable else d
 
     async def add_user_money(self, userid: int, amount: int):
         usermoney = await self.get_user_money(userid, human_readable=False)
-        await self.set_user_money(userid, usermoney + amount)
-        await self.update_cache()
+        return await self.set_user_money(userid, usermoney + amount)
 
     async def get_leaderboard(self, guild=None, maxusers=10):
         """
@@ -180,7 +176,7 @@ class Database(object):
             If :param:guild is specified, only users from that guild will be returned.
             If :param:maxusers is specified, the return value will be a max of that
         """
-        users = [int(u) for u in self.cache.get("users") if u]
+        users = [int(u) for u in self._cache.get("users") if u]
         unsorted = {u:await self.get(f"users/{u}/money", 0) for u in users}
         filteredmax = sorted(unsorted, key=lambda i:-unsorted[i])
         
@@ -204,6 +200,5 @@ async def get_prefix(bot: commands.Bot, msg: Message):
         if bot.is_ready():
             prfx = await bot.db.get_guild_prefix(msg.guild.id)
             prefixes = [prfx] if prfx != None else prefixes
-    else:
-        prefixes.append("")
+    else: prefixes.append("")
     return commands.when_mentioned_or(*prefixes)(bot, msg)
