@@ -164,7 +164,7 @@ class Database(object):
     async def get_user_money(self, userid: int, *, human_readable=True):
         """`human_readable` specefies if the bot should add in commas every
         three characters, which creates an `str` object instead of an `int`"""
-        d = await self.get(f"users/{userid}/money")
+        d = await self.get(f"users/{userid}/money", 0)
         return f"{d:,}" if human_readable else d
 
     async def add_user_money(self, userid: int, amount: int):
