@@ -138,7 +138,9 @@ class Database(object):
         return await self.save(f"guilds/{guildid}/prefix", prefix)
 
     async def get_guild_prefix(self, guildid: int):
-        return await self.get(f"guilds/{guildid}/prefix", None)
+        d= await self.get(f"guilds/{guildid}/prefix", None)
+        return d if not isinstance(d, str) else None
+        # TODO and FIXME: Holy fuck this is so broken it needs to be fixed asap
 
     # Guild server IPs
     async def set_minecraft_server(self, guildid: int, serverip: str):
