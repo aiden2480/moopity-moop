@@ -82,7 +82,10 @@ class Database(object):
             if element:
                 value = data.get(element)
                 return value if len(args) == 1 else await self.get("/".join(args[1:]), default, data=value)
-            else: return default # Invalid key, return default
+            else:
+                return default # Invalid key, return default
+        elif not data:
+            return default # Wasn't able to find anything
         else: # No key/data supplied, get all
             async with self.sess.get(self.__url) as resp:
                 return (await resp.json())["result"]
@@ -201,6 +204,7 @@ async def get_prefix(bot: commands.Bot, msg: Message):
     if msg.guild:
         if bot.is_ready():
             prfx = await bot.db.get_guild_prefix(msg.guild.id)
+            prfx = prfx if isinstance(prfx, str) else None
             prefixes = [prfx] if prfx != None else prefixes
     else: prefixes.append("")
     return commands.when_mentioned_or(*prefixes)(bot, msg)
