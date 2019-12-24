@@ -245,7 +245,7 @@ class Fun(CustomCog):
         await self.db.add_user_money(ctx.author.id, ingots)
         
     @commands.command()
-    @commands.cooldown(3, 60, commands.BucketType.channel)
+    @commands.cooldown(3, 60)
     @commands.bot_has_permissions(add_reactions=True)
     async def simonsays(self, ctx):
         """Start a game of Simon Says in the channel
@@ -303,7 +303,7 @@ class Fun(CustomCog):
                 
                 try: reaction, user = done.pop().result()
                 except KeyError: # Timed out
-                    await msg.edit(content=f"**{ctx.author.display_name}**, you timed out! 😕\nYou recieved a total of **{ingots}** ingots")
+                    await msg.edit(content=f"**{ctx.author.display_name}**, you timed out! 😕\nAfter a total of **{len(pattern)}** rounds, You recieved **{ingots}** ingots")
                     await self.bot.db.add_user_money(ctx.author.id, ingots)
                     return
                 
@@ -331,7 +331,7 @@ class Fun(CustomCog):
                     try: await reaction.remove(ctx.author)
                     except: pass
 
-                ingots += randint(0, len(pattern)+1)
+                ingots += randint(1, len(pattern)+1)
                 await sleep(1.25)
             else: # Incorrect
                 await msg.edit(content=f"**{ctx.author.display_name}**, That is incorrect! 😕\nThe final pattern was **[ {' '.join(pattern)} ]** but you guessed **[ {' '.join(userpattern)} ]**\nYou recieved a total of **{ingots}** ingots")

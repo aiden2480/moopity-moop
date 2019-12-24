@@ -182,8 +182,9 @@ async def on_command_error(ctx: commands.Context, error):
         await ctx.send(embed=e)
     elif isinstance(error, commands.CommandOnCooldown):
         cool = ctx.command._buckets._cooldown
+        each = f"each {cool.type.name}" if cool.type.name != "default" else "globally"
         e.title = "This command is on cooldown!"
-        e.description = f"This command can only be used `{cool.rate}` times per every `{round(cool.per)}s` (each {cool.type.name})"
+        e.description = f"This command can only be used `{cool.rate}` times per every `{round(cool.per)}s` ({each})\n"
         e.description += f"Please try again in {naturaltime(dt.now()+td(seconds=error.retry_after))}"
         await ctx.send(embed=e)
     elif isinstance(error, commands.MissingPermissions):

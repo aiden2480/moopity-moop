@@ -1,5 +1,6 @@
 from asyncio import get_event_loop
 from os import getenv
+from functools import reduce
 
 from aiohttp import ClientSession
 from discord import Message
@@ -68,27 +69,20 @@ class Database(object):
         } if self._cache.get("guilds") else dict()
         return self._cache
 
-    async def get(self, key: str, default=None, *, data=None):
+    async def get(self, key: str, default=None):
         """
             Get a value from the database cache, using a key in the format `one/two`, etc.
             If a `default` is supplied, that will be returned if a value could not be resolved.
             Do not supply the `data` paramater, this is used by the internal operations.
         """
-        data = data or self._cache
-        args = key.split("/")
 
-        if args and data:
-            element = args[0]
-            if element:
-                value = data.get(element)
-                return value if len(args) == 1 else await self.get("/".join(args[1:]), default, data=value)
-            else:
-                return default # Invalid key, return default
-        elif not data:
-            return default # Wasn't able to find anything
-        else: # No key/data supplied, get all
+        # Fetch the data
+        if not bool(key):
             async with self.sess.get(self.__url) as resp:
                 return (await resp.json())["result"]
+        
+        # Get the data
+        return reduce(lambda d, k: d.get(k, default) if isinstance(d, dict) else default, key.split("/"), self._cache)
 
     async def save(self, key: str, data: any):
         url = f"{self.__url}/{key}"
@@ -167,7 +161,8 @@ class Database(object):
     async def get_user_money(self, userid: int, *, human_readable=True):
         """`human_readable` specefies if the bot should add in commas every
         three characters, which creates an `str` object instead of an `int`"""
-        d = await self.get(f"users/{userid}/money", 0)
+        d = await self.get(f"users/{userid}/money", default=0)
+        print(f"search result for {userid!r}: {d}")
         return f"{d:,}" if human_readable else d
 
     async def add_user_money(self, userid: int, amount: int):
