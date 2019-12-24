@@ -29,7 +29,7 @@ bot = CustomBot(
     description="A small bot with commands to utilise your Minecraft/Discord experience",
     owner_id=272967064531238912,
     status=Status.idle,
-    activity=Activity(type=2, name="Windows XP startup sounds"),
+    activity=Activity(type=2, name="ambient Minecraft music"),
     case_insensitive=True,
 )
 
@@ -43,7 +43,7 @@ jinja_setup(site, loader=FileSystemLoader("./website/templates"))
 session_setup(site, EncryptedCookieStorage(
     bot.env.get("WEBSITE_COOKIE_TOKEN", rand()*32).encode(),
     cookie_name="MOOPITYMOOP",
-    max_age=3600*24*31, # One year
+    max_age=3600*24*31, # One month
 ))
 for mw in middlewares:
     site.middlewares.append(mw)
@@ -94,8 +94,8 @@ async def on_connect():
     await bot.change_presence(status=Status.online, afk=False, activity=Game(name=choice((
         "Minecraft",
         f"{bot.default_prefix}help for commands!",
-        f"created by {bot.owner}",
-        f"{len(bot.users)} users accross {len(bot.guilds)} servers",
+        #f"created by {bot.owner}",
+        #f"{len(bot.users)} users accross {len(bot.guilds)} servers",
     ))))
 
 
@@ -181,8 +181,10 @@ async def on_command_error(ctx: commands.Context, error):
         e.description = "This command cannot be used in a DM",
         await ctx.send(embed=e)
     elif isinstance(error, commands.CommandOnCooldown):
+        cool = ctx.command._buckets._cooldown
         e.title = "This command is on cooldown!"
-        e.description = f"Please try again in {naturaltime(dt.now()+td(seconds=error.retry_after), future=True)}"
+        e.description = f"This command can only be used `{cool.rate}` times per every `{round(cool.per)}s` (each {cool.type.name})"
+        e.description += f"Please try again in {naturaltime(dt.now()+td(seconds=error.retry_after))}"
         await ctx.send(embed=e)
     elif isinstance(error, commands.MissingPermissions):
         perms = [perm.replace("_", " ").replace("guild", "server").title() for perm in error.missing_perms]
@@ -222,11 +224,11 @@ async def on_command_error(ctx: commands.Context, error):
             return await ctx.send(embed=e)
 
         webhook = Webhook.from_url(bot.env["ERROR_WEBHOOK_URL"], adapter=AsyncWebhookAdapter(bot.session))
-        msg=await webhook.send(embed=e, username=bot.user.name, avatar_url=bot.user.avatar_url)
+        await webhook.send(embed=e, username=bot.user.name, avatar_url=bot.user.avatar_url)
 
         em = Embed(
             color=0xFFA500, timestamp=dt.utcnow(), title="💣 Oof, an error occoured 💥",
-            description=f"Please [join the support guild]({bot.guild_invite_url}) and tell **{bot.owner}** what happened to help fix this bug.\n\nError code: {error_code} [Jump URL]({msg.jump_url})",
+            description=f"Please [join the support guild]({bot.guild_invite_url}) and tell **{bot.owner}** what happened to help fix this bug.\n\nError code: {error_code}",
         )
 
         em.set_footer(text=f"< Look for this guy!", icon_url=bot.owner.avatar_url)
@@ -281,8 +283,4 @@ if __name__ == "__main__":
         bot.logger.info("Starting bot")
         bot.run()
     finally:
-        bot.logger.info("Stopping script with exit code 0")
-
-    # Close up from website
-    site.logger.debug("Closing asyncio loop")
-    loop.close()
+        bot.logger.info("Stopping script")

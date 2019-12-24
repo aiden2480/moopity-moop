@@ -9,7 +9,7 @@
     [ ] Create better command names/aliases
     [ ] Fix up the command descriptions/docs
     [ ] Rip off the help command from https://github.com/nguuuquaaa/Belphegor/blob/master/belphegor/help.py because that was a cool help command
-    [ ] Create voter-only commands, maybe worth more coins?
+    [ ] Create voter-only commands, maybe worth more ingots?
     [ ] Rename currency to ingots, and create a global ingot emoji
         [ ] Generic currency is an iron ingot, but "super" currency is a gold ingot
     

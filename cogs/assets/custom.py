@@ -199,3 +199,30 @@ class CustomContext(commands.Context):
             if user:
                 return f"@{user.name} "
         return self.prefix
+    
+    @property
+    def perms(self):
+        """Returns the permissions of the context"""
+        if self.guild is not None:
+            return self.channel.permissions_for(self.guild.me)
+        return self.channel.permissions_for(self.bot.user)
+
+
+# Converters
+class MinecraftUser(commands.Converter):
+    """Ensures the argument passed is a valid Minecraft user,
+    ie the name is not over the character limit, etc"""
+    async def convert(self, ctx: CustomContext, argument: str) -> str:
+        raise commands.BadArgument(f"Username {argument!r} is not a valid Mineraft username")
+
+class MinecraftServer(commands.Converter):
+    """Ensures the argument passed is a valid Minecraft server,
+    ie the ip is not over the character limit, etc"""
+    async def convert(self, ctx: CustomContext, argument: str) -> str:
+        if not all((
+            len(argument) > 16, # TODO what the actual len lol?
+            # TODO: spaces, characters, etc
+        )):
+            raise commands.BadArgument(f"IP {argument!r} is not a valid Mineraft IP")
+        return argument
+    

@@ -65,7 +65,7 @@ class Developer(CustomCog):
         e.description = f"Finished reloading `{len(cogs)}` cogs in `{round((time()-start_time)*1000)}`ms ⚙"
         await msg.edit(embed=e)
 
-    @commands.command()
+    @commands.command(aliases=["sauce"])
     async def source(self, ctx, *, command: str=None):
         """Displays my full source code or for a specific command."""
         source = "https://github.com/aiden2480/moopity-moop"
@@ -87,7 +87,7 @@ class Developer(CustomCog):
         lines, firstlineno = getsourcelines(src)
         location = relpath(filename).replace("\\", "/")
         final_url = f"{source}/blob/master/{location}#L{firstlineno}-L{firstlineno+len(lines)-1}"
-        await ctx.send(final_url)
+        await ctx.send(f"Command **{obj}** takes up `{len(lines)}` lines in file **{location}**\n{final_url}")
     
     @commands.command()
     async def reset(self, ctx, mbr: commands.Greedy[User]=None, *commands):

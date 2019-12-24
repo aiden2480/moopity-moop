@@ -1,9 +1,10 @@
-from asyncio import TimeoutError as AsyncTimeoutError
+from asyncio import TimeoutError as AsyncTimeoutError, sleep, wait
 from datetime import datetime as dt
 from html import unescape
 from io import BytesIO
 from random import choice, randint, shuffle
 from time import perf_counter
+import concurrent.futures
 
 from akinator import CantGoBackAnyFurther
 from akinator.async_aki import Akinator
@@ -11,8 +12,9 @@ from discord import Colour, Embed, File
 from discord.ext import commands
 from cogs.assets.custom import CustomCog
 
-REDDIT_POST_LIMIT=75
 GLITCH_ALL = "".join((chr(i) for i in range(0x300, 0x370))) + "".join((chr(i) for i in range(0x483, 0x48a)))
+DEFAULT_SIMONSAYS_EMOJIS = list("🔴💛🍏")
+EXTRA_SIMONSAYS_EMOJIS = {4: "📘", 7: "💜", 10: "🔶"}
 
 
 class Fun(CustomCog):
@@ -148,7 +150,7 @@ class Fun(CustomCog):
     @commands.bot_has_permissions(add_reactions=True)
     async def trivia(self, ctx: commands.Context, difficulty="random"):
         """Gives you some random trivia.\n
-        Harder trivia is worth more coins and easier is worth less
+        Harder trivia is worth more ingots and easier is worth less
         To specify a difficulty of the trivia you want, enter either
         `easy`, `medium`, or `hard` in to the command paramenters
         and you will recieve that level difficulty trivia.
@@ -171,10 +173,11 @@ class Fun(CustomCog):
         correct_answer_index = answers.index(question["correct_answer"])
         correct_emoji = reactions[correct_answer_index]
         worth = dict(easy=2, medium=5, hard=7)[question["difficulty"]] + randint(-3, 3)
+        worth = 1 if worth <= 0 else worth
 
         for emoji, ans in zip(reactions, answers):
             embed.description += f"\n{emoji} {unescape(ans)}"
-        embed.add_field(name="Worth", value=f"`{worth} coins`")
+        embed.add_field(name="Worth", value=f"`{worth} ingots`")
         embed.add_field(name="Difficulty", value=f"`{question['difficulty']}`")
         embed.add_field(name="Category", value=f"`{question['category']}`")
         embed.set_author(name=f"{ctx.author}'s trivia question", icon_url=ctx.author.avatar_url)
@@ -229,46 +232,114 @@ class Fun(CustomCog):
         
         end = perf_counter()-start
         diff = abs(10-end)
-        coins = {0:4, 1:2, 2:1}.get(round(diff), 0)
+        ingots = {0:4, 1:2, 2:1}.get(round(diff), 0)
         endstr = f"{end:.1f}" if len(str(round(end))) == 2 else f"{end:.2f}"
         embed.description = "\n".join(i.strip() for i in f"""```md
             \u200b      Results
             ====================
             < time   = "{endstr}s" >
             < off by = "{diff:.2f}s" >
-            < ingots = "{coins} net" >
+            < ingots = "{ingots} net" >
         ```""".splitlines())
         await msg.edit(embed=embed)
-        await self.db.add_user_money(ctx.author.id, coins)
-    
-    @commands.command(enabled=False)
-    async def reddit(self, ctx):
-        """Get a random post off r/minecraft"""
-        await ctx.trigger_typing()
-        embed = Embed(colour=Colour.blue())
-        async with self.sess.get(f"https://reddit.com/r/minecraft/top.json?limit={REDDIT_POST_LIMIT}") as resp:
-            data = await resp.json()
-            post = choice(data["data"]["children"])["data"]
-        footer = f"👍 {post['ups']} | 💬 {post['num_comments']}"
-        url = Embed.Empty
-        file = None
-        await ctx.send(f"https://reddit.com{post['permalink']}")
+        await self.db.add_user_money(ctx.author.id, ingots)
+        
+    @commands.command()
+    @commands.cooldown(3, 60, commands.BucketType.channel)
+    @commands.bot_has_permissions(add_reactions=True)
+    async def simonsays(self, ctx):
+        """Start a game of Simon Says in the channel
+        You will be shown an string of emojis, increasing in length
+        and you must use reactions to select the order in which they were shown
 
-        if post["all_awardings"]:
-            award = post["all_awardings"][-1:]
-            footer = f"{award['name']} x{award['count']}" +f" | {footer}"
-            url = award["icon_url"]
+        The game will continue infinitely until you get it wrong.
+        You will recieve more ingots the further you get.
+        As you progress throught the levels, you will have a shorter timeout and
+        more emoji combinations will be added
 
-        # TODO: Implement if the video size is too big
-        if post["post_hint"] == "video:hosted":
-            url = post["media"]["reddit_video"]["fallback_url"]
-            async with self.sess.get(url) as resp:
-                file=File(BytesIO(await resp.read()), filename="video.mp4")
+        You can either add a reaction or remove a reaction to a message and it will be counted
+        """
+        # TODO: Add a backspace emoji to delete the last one if you accadently typed it incorrectly
+        # TODO: Less time before you hit the timeout if there are more emojis
+        # TODO: Add more memory games like this one
+        # TODO: Add a leaderboard for people's max scores on this game
+        # TODO: Clean this up so it's a little bit less API-abusable
 
-        #embed.set_image(url=post["url"])
-        embed.set_footer(text=footer, icon_url=url)
-        embed.description = f"{self.bot.emoji.minecraft} [`{post['author']}`](https://reddit.com/u/{post['author']}) - [{post['title']}](https://reddit.com{post['permalink']})"
-        await ctx.send(embed=embed, file=file)
+        # Setup
+        pattern, ingots = [], 0
+        emojis = DEFAULT_SIMONSAYS_EMOJIS.copy()
+        msg = await ctx.send(f"**{ctx.author.display_name}**, your game of Simon Says is starting now!\nWatch closely")
+        await sleep(1.25)
+        
+        while True: # Main game
+            msg = await ctx.channel.fetch_message(msg.id)
+            pattern.append(choice(emojis))
+            for emoji in pattern:
+                await msg.edit(content=f"Watch closely: **[ {emoji} ]**")
+                await sleep(1)
+                await msg.edit(content="Watch closely")
+                await sleep(1)
+
+            # Add appropriate reactions
+            missing = [emoji for emoji in emojis if emoji not in [str(r.emoji) for r in msg.reactions]]
+            [await msg.add_reaction(emoji) for emoji in missing if missing]
+            await msg.edit(content="What order did the emojis appear in?")
+            userpattern = list()
+
+            # Check function
+            def check(reaction, user):
+                return all((
+                    str(reaction.emoji) in emojis,
+                    user.id == ctx.author.id,
+                    reaction.message.channel.id == msg.channel.id,
+                ))
+
+            while True: # User input
+                done, pending = await wait([
+                    self.bot.wait_for("reaction_add", check=check),
+                    self.bot.wait_for("reaction_remove", check=check),
+                ], return_when="FIRST_COMPLETED", timeout=5+len(pattern)*3)
+                [future.cancel() for future in pending]
+                
+                try: reaction, user = done.pop().result()
+                except KeyError: # Timed out
+                    await msg.edit(content=f"**{ctx.author.display_name}**, you timed out! 😕\nYou recieved a total of **{ingots}** ingots")
+                    await self.bot.db.add_user_money(ctx.author.id, ingots)
+                    return
+                
+                userpattern.append(reaction.emoji)
+                await msg.edit(content=f"What order did the emojis appear in? **[ {' '.join(userpattern)} ]** ({len(userpattern)}/{len(pattern)})")
+                
+                if len(userpattern) == len(pattern):
+                    break
+            
+            await sleep(0.5)
+            if userpattern == pattern: # Correct
+                con = f"**{ctx.author.display_name}**, That is correct! 👍 Round **{len(pattern)+1}** is starting now!"
+                time = 1.5
+                
+                if len(pattern)+1 in EXTRA_SIMONSAYS_EMOJIS.keys():
+                    e = EXTRA_SIMONSAYS_EMOJIS[len(pattern)+1]
+                    emojis.append(e)
+                    con += f"\n**BONUS**: You unlocked a new emoji! You have unlocked **[ {e} ]**"
+                    time += 0.5
+                    await msg.add_reaction(e)
+                await msg.edit(content=con)
+
+                msg = await ctx.channel.fetch_message(msg.id) # Need to keep grabbing the new message
+                for reaction in msg.reactions:
+                    try: await reaction.remove(ctx.author)
+                    except: pass
+
+                ingots += randint(0, len(pattern)+1)
+                await sleep(1.25)
+            else: # Incorrect
+                await msg.edit(content=f"**{ctx.author.display_name}**, That is incorrect! 😕\nThe final pattern was **[ {' '.join(pattern)} ]** but you guessed **[ {' '.join(userpattern)} ]**\nYou recieved a total of **{ingots}** ingots")
+                await self.db.add_user_money(ctx.author.id, ingots)
+                
+                try: await msg.clear_reactions()
+                except: pass
+                break
 
 
 def setup(bot: commands.Bot):

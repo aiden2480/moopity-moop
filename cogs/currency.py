@@ -16,7 +16,7 @@ class Currency(CustomCog):
         self.db = bot.db
 
     @commands.command(aliases=["bal"])
-    @commands.cooldown(3, 10, commands.BucketType.user)
+    @commands.cooldown(3, 10, commands.BucketType.member)
     async def balance(self, ctx, member: Member="self"):
         """Find a user's balance"""
         member = ctx.author if member == "self" else member
@@ -36,7 +36,7 @@ class Currency(CustomCog):
         lbdata = await self.db.get_leaderboard(ctx.guild, maxusers=10)
         if not lbdata:
             embed.description += "It seems that literally everyone in this server is broke 🤷\n"
-            embed.description += f"Use {ctx.clean_prefix}daily to get started"
+            embed.description += f"Use `{ctx.clean_prefix}daily` to get started"
         
         for id_, money in lbdata.items():
             emoji = self.db.LEADERBOARD_EMOJI_KEY.get(
@@ -75,8 +75,8 @@ class Currency(CustomCog):
 
     @commands.command()
     @commands.guild_only()
-    @commands.cooldown(1, 300, commands.BucketType.user)
-    @commands.cooldown(3, 1200, commands.BucketType.user)
+    @commands.cooldown(1, 300, commands.BucketType.member)
+    @commands.cooldown(3, 1200, commands.BucketType.member)
     async def steal(self, ctx, victim: Member):
         # FIXME: Change all the ratios for stealing and stoof
         """Attempts to steal from an unsuspecting victim\n
@@ -131,7 +131,7 @@ class Currency(CustomCog):
 
     @commands.command()
     async def flip(self, ctx, headsortails: str = ""):
-        """Flip a coin, who knows, you might get some money"""
+        """Flip a coin, who knows, you might get some ingots"""
         call = headsortails.lower()
         esp = "heads" if randint(0, 1) else "tails"
 

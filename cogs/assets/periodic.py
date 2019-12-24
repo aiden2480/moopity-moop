@@ -76,6 +76,7 @@ class Checker(object):
 
 class ServerStatus(CustomCog):
     # TODO: What happens when someone changes the IP while the bot is still pinging hmm?
+    # TODO rewrite this lulul
     """The cog that handles all the server pinging"""
 
     def __init__(self, bot: commands.Bot):

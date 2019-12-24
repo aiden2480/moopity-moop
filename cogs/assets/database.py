@@ -181,7 +181,7 @@ class Database(object):
             If :param:guild is specified, only users from that guild will be returned.
             If :param:maxusers is specified, the return value will be a max of that
         """
-        users = [int(u) for u in self._cache.get("users") if u]
+        users = [int(u) for u in await self.get("users", list()) if u]
         unsorted = {u:await self.get(f"users/{u}/money", 0) for u in users}
         filteredmax = sorted(unsorted, key=lambda i:-unsorted[i])
         
