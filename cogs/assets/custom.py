@@ -213,7 +213,12 @@ class MinecraftUser(commands.Converter):
     """Ensures the argument passed is a valid Minecraft user,
     ie the name is not over the character limit, etc"""
     async def convert(self, ctx: CustomContext, argument: str) -> str:
-        raise commands.BadArgument(f"Username {argument!r} is not a valid Mineraft username")
+        base = f"Username `{argument!r}` is not a valid Mineraft username\n"
+        
+        if len(argument) > 16:
+            raise commands.BadArgument(f"{base}Usernames are a max of 16 characters")
+        
+        return argument
 
 class MinecraftServer(commands.Converter):
     """Ensures the argument passed is a valid Minecraft server,

@@ -165,8 +165,8 @@ async def on_command_error(ctx: commands.Context, error):
             ctx.command.enabled = True
             try: await ctx.reinvoke()
             except Exception as err:
-                await ctx.send(f"```py\n{err.__class__.__name__}: {err}```")
-                raise
+                lol = "\n".join(format_exception(type(err), err, err.__traceback__, 10))
+                await ctx.send(f"```py\n{lol}``````py\n{err.__class__.__name__}: {err}```")
             ctx.command.enabled = False
 
             e.description += " Done\nRe-disabling command"

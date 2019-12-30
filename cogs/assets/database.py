@@ -29,6 +29,7 @@ class Database(object):
         self.TIMEOUT = timeout
 
         self._cache = dict()
+        self._requested = False
         self.guild_server_ips = dict()
         self.guild_minecraft_roles = dict()
         
@@ -44,7 +45,7 @@ class Database(object):
     @property
     def ready(self) -> bool:
         """Indicates if the internal cache is ready"""
-        return self._cache is not dict()
+        return bool(self._requested)
     
     @property
     def cache(self) -> dict:
@@ -67,6 +68,8 @@ class Database(object):
             for g in self._cache["guilds"]
             if self._cache["guilds"][g].get("minecraft")
         } if self._cache.get("guilds") else dict()
+
+        self._requested = True
         return self._cache
 
     async def get(self, key: str, default=None):
@@ -135,9 +138,7 @@ class Database(object):
         return await self.save(f"guilds/{guildid}/prefix", prefix)
 
     async def get_guild_prefix(self, guildid: int):
-        d= await self.get(f"guilds/{guildid}/prefix", None)
-        return d if not isinstance(d, str) else None
-        # TODO and FIXME: Holy fuck this is so broken it needs to be fixed asap
+        return await self.get(f"guilds/{guildid}/prefix", None)
 
     # Guild server IPs
     async def set_minecraft_server(self, guildid: int, serverip: str):
@@ -162,7 +163,6 @@ class Database(object):
         """`human_readable` specefies if the bot should add in commas every
         three characters, which creates an `str` object instead of an `int`"""
         d = await self.get(f"users/{userid}/money", default=0)
-        print(f"search result for {userid!r}: {d}")
         return f"{d:,}" if human_readable else d
 
     async def add_user_money(self, userid: int, amount: int):
@@ -197,9 +197,8 @@ async def get_prefix(bot: commands.Bot, msg: Message):
     prefixes = [bot.default_prefix]
 
     if msg.guild:
-        if bot.is_ready():
+        if bot.is_ready() and bot.db.ready:
             prfx = await bot.db.get_guild_prefix(msg.guild.id)
-            prfx = prfx if isinstance(prfx, str) else None
             prefixes = [prfx] if prfx != None else prefixes
     else: prefixes.append("")
     return commands.when_mentioned_or(*prefixes)(bot, msg)

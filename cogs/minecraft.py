@@ -5,7 +5,7 @@ from time import ctime, time
 from discord import Colour, Embed
 from discord.ext import commands
 from humanize import naturaltime
-from cogs.assets.custom import CustomCog
+from cogs.assets.custom import CustomCog, MinecraftUser
 
 
 class Minecraft(CustomCog):
@@ -273,7 +273,7 @@ class Minecraft(CustomCog):
 
     @commands.cooldown(8, 45, commands.BucketType.user)
     @commands.command(aliases=["usernamecheck"])
-    async def namecheck(self, ctx, name):
+    async def namecheck(self, ctx, name: MinecraftUser):
         """Check if a Minecraft username is taken, or if you can claim it"""
         if len(name) > 16:
             return await ctx.send("A Minecraft username is a max of 16 characters...")

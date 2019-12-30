@@ -50,12 +50,11 @@ class Currency(CustomCog):
         await ctx.send(embed=embed)
 
     @commands.command(aliases=["freemoney"])
-    @commands.cooldown(1, 60 * 60 * 4, commands.BucketType.user)
+    @commands.cooldown(1, 60*60*24, commands.BucketType.user)
     async def daily(self, ctx):
         """Redeem your daily ingots
-        Gives you a random amount of money between 300 and 375 ingots
-        into your wallet"""
-        amount = 300 + randint(0, 75)
+        Gives you a random amount of money between 300 and 375 ingots"""
+        amount = randint(300, 375)
         await ctx.send(f"Redeemed your daily cheque for **{amount} {self.bot.ingot}** 👍")
         await self.db.add_user_money(ctx.author.id, amount)
 
@@ -75,8 +74,7 @@ class Currency(CustomCog):
 
     @commands.command()
     @commands.guild_only()
-    @commands.cooldown(1, 300, commands.BucketType.member)
-    @commands.cooldown(3, 1200, commands.BucketType.member)
+    @commands.cooldown(2, 400, commands.BucketType.member)
     async def steal(self, ctx, victim: Member):
         # FIXME: Change all the ratios for stealing and stoof
         """Attempts to steal from an unsuspecting victim\n
@@ -142,6 +140,54 @@ class Currency(CustomCog):
             return await self.db.add_user_money(ctx.author.id, -1)
         await ctx.send(f"Congrats you have ESP. As a result, you were rewarded with **1 {self.bot.ingot}**")
         await self.db.add_user_money(ctx.author.id, 1)
+
+    @commands.command(enabled=False)
+    async def gamble(self, ctx, amount: int, roll: int=None):
+        """Gamble some ingots, you might get some good stuff
+        
+        If you try and gamble a lot of your total ingots,
+        your chance of winning will go down slightly each percent
+        (To save my currency system from itself lol)
+        """
+        # TODO: This works, but still looks really gross
+        ingots = await self.db.get_user_money(ctx.author.id, human_readable=False)
+        perc = round(100*float(amount)/float(ingots)) # The percentage of the total ingots that were betted
+        if amount > ingots:
+            return await ctx.send("I'm pretty sure you can't gamble money that you don't have...")
+
+        winpercent = 55
+        eightypercent = randint(70, 90) # Give a bit of a range
+        if perc > eightypercent: # They're trying to bet too much and must be
+            await ctx.send("You're trying to bet more than 80% of your money!")
+            for _ in range(perc-eightypercent, 100):
+                winpercent -= 1
+
+        rand = randint(1, 100) if not roll else roll
+        won = rand in range(1, winpercent-1)
+        extra = randint(5, 25)
+
+        winemoji = "🎉" if rand > 10 else "🤑"
+        loseemoji = "😕" if rand > 10 else "🌪️"
+        emoji = winemoji if won else loseemoji
+
+        if won:
+            msg = f"🎉 You won `{amount}` {self.bot.ingot} Congratulations!"
+            
+            if rand < 10:
+                amount += extra
+                msg = f"🤑 **BONUS**: You found `{extra}` ingots from under the gambling machine. You won a total of `{amount}` ingots!"
+        else:
+            msg = f"😕 You lost `{amount}` {self.bot.ingot} Better luck next time"
+
+            if rand < 10:
+                amount += extra
+                msg = f"🌪️ You gambled away **{amount}** ingots without any luck and to top it off, you were mugged outside the shop. You lost a further {extra}. rip"
+        
+        lol = await ctx.send(f"🎲 **{ctx.author.display_name}**, you gambled `{amount}` {self.bot.ingot} and rolled a `{rand}` which means you **{'win' if won else 'lost'}**!\n{msg}")
+        await ctx.react(lol, emoji)
+
+        await ctx.send(f"Ok ima give you `{amount if won else -amount}` now")
+        # await self.db.add_user_money(amount if won else -amount)
 
 
 class AdminCurrency(CustomCog):
