@@ -29,6 +29,8 @@
     
     [ ] User profile command, showing ingots, servers, whatever
         [ ] Link Minecraft account with Discord, by UUID
+    
+    [ ] Update the steal command description
    
     [ ] Since this is a **Minecraft** bot, ima need more **Minecraft** commands
         [ ] Get recipes

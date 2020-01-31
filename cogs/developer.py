@@ -16,7 +16,9 @@ class Developer(CustomCog):
     
     async def cog_before_invoke(self, ctx):
         """These are dev only commands"""
-        # TODO: Move source out of dev only lmao
+        if ctx.command.name == "source":
+            return
+        
         if ctx.author.id != ctx.bot.owner_id:
             raise commands.NotOwner()
 
