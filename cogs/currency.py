@@ -1,10 +1,20 @@
-from random import randint
+from asyncio import TimeoutError as AsyncTimeoutError
+from datetime import datetime as dt, timedelta as td
+from random import choice, randint
 from typing import Optional
 
 from discord import Colour, Embed, Member, User
 from discord.ext import commands
 from cogs.assets.custom import CustomCog, cooldown
 
+WORK_PHRASES = [
+    "It works, why?",
+    "It doesn't work, why?",
+    "HTML is a real programming language",
+    "Python is the best programming language",
+    "I can't believe it worked first time!",
+    "It's not a bug it's a feature",
+]
 
 class Currency(CustomCog):
     """What's better than a currency system where all you can do is
@@ -14,6 +24,7 @@ class Currency(CustomCog):
         super().__init__(self)
         self.bot = bot
         self.db = bot.db
+        self.work_streak = dict() # {id: [hours_worked]}
 
     @commands.command(aliases=["bal"])
     async def balance(self, ctx, member: Member="self"):
@@ -41,7 +52,7 @@ class Currency(CustomCog):
             emoji = self.db.LEADERBOARD_EMOJI_KEY.get(
                 len(embed.description.split("\n")),
             self.db.LEADERBOARD_DEFAULT_EMOJI)
-            embed.description += f"\n{emoji} **{self.bot.get_user(id_)}** has **{money:,} {self.bot.ingot}**"
+            embed.description += f"\n{emoji} **{money:,} {self.bot.ingot}** - {self.bot.get_user(id_)}"
         
         url = f"{self.bot.website_url}/leaderboard?guild={ctx.guild.id}"
         embed.description += f"\n\nSee the online leaderboard [here]({url} \"{ctx.guild}'s leaderboard\")"
@@ -177,6 +188,49 @@ class Currency(CustomCog):
 
         await ctx.send(f"Ok ima give you `{amount if won else -amount}` now")
         # await self.db.add_user_money(amount if won else -amount)
+
+    @commands.command(enabled=False)
+    @cooldown(1, 60*60, 1, 60*50, commands.BucketType.user)
+    async def work(self, ctx):
+        if ctx.author.id not in self.work_streak.keys(): # User has no streak recorded
+            self.work_streak[ctx.author.id] = []
+        else: # Check if the streak has been broken and delete it
+            streak = self.work_streak[ctx.author.id]
+            now = dt.now()
+            if not (now-td(hours=24) <= streak[-1] <= now):
+                # Longer than twenty four hours since last work
+                self.work_streak[ctx.author.id] = []
+        
+        phrase = choice(WORK_PHRASES)
+        prompt = await ctx.send("Type the following in chat:\n`{}`".format("\u200b".join(phrase)))
+
+        try:
+            def check(m):
+                return m.author.id == ctx.author.id and m.channel.id == ctx.channel.id
+
+            msg = await self.bot.wait_for("message", check=check, timeout=45.0)
+        except AsyncTimeoutError:
+            await prompt.edit(content="Timed out \N{CONFUSED FACE}")
+            return self.work_streak.pop(ctx.author.id)
+
+        if msg.content.replace("\u200b", "") == phrase and "\u200b" in msg.content:
+            await ctx.send("No cheating You lose!")
+            return self.work_streak.pop(ctx.author.id)
+        if msg.content.lower() != phrase.lower():
+            await ctx.send(f"Wrong! 😕\n```diff\n+ {phrase}\n- {msg.content}```")
+            return self.work_streak.pop(ctx.author.id)
+
+        self.work_streak[ctx.author.id].append(dt.now())
+        embed = Embed(colour=Colour.blue())
+        embed.description = """
+            Correct well done! {}
+            You earned `{}` ingots from a `{}` day streak
+        """.format(
+            self.bot.ingot,
+            90+10*len(self.work_streak[ctx.author.id]),
+            len(self.work_streak[ctx.author.id])
+        )        
+        await ctx.send(embed=embed)
 
 
 class AdminCurrency(CustomCog):
