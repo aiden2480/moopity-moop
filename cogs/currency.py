@@ -57,7 +57,7 @@ class Currency(CustomCog):
         await ctx.send(f"Redeemed your daily cheque for **{amount} {self.bot.ingot}** 👍")
         await self.db.add_user_money(ctx.author.id, amount)
 
-    @commands.command()
+    @commands.command(aliases=["pay"])
     async def give(self, ctx, member:Member, amount: int):
         """I don't know why you would want to give away your hard earned ingots but sure"""
         if amount < 0:
