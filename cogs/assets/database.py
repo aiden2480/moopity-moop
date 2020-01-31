@@ -152,7 +152,7 @@ class Database(object):
         return await self.save(f"guilds/{guildid}/role", str(roleid))
 
     async def get_minecraft_role(self, guildid: int):
-        return await self.get(f"guilds/{guildid}/role")
+        return await self.get(f"guilds/{guildid}/role", default=0)
 
     # Currency
     async def set_user_money(self, userid: int, amount: int):

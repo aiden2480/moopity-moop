@@ -4,7 +4,7 @@ from typing import Optional
 
 from discord import Embed, Colour, File, Member
 from discord.ext import commands
-from cogs.assets.custom import CustomCog
+from cogs.assets.custom import CustomCog, cooldown
 
 BASE_URL="https://memegen.chocolatejade42.repl.co"
 conv = dict(
@@ -59,7 +59,7 @@ class Image(CustomCog):
         await ctx.send(embed=embed)
     
     @commands.command()
-    @commands.cooldown(3, 5, commands.BucketType.user)
+    @cooldown(3, 5, 5, 5, commands.BucketType.user)
     async def achievement(self, ctx, *, msg=""):
         """Create an achievement in the Minecraft format"""
         args = msg.split("|", maxsplit=2)
@@ -77,7 +77,7 @@ class Image(CustomCog):
             await ctx.send(file=file)
 
     @commands.command()
-    @commands.cooldown(3, 5, commands.BucketType.user)
+    @cooldown(3, 5, commands.BucketType.user)
     async def trigger(self, ctx, user: Optional[Member]):
         """Trigger a user"""
         user = user or ctx.author

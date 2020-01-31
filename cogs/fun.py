@@ -1,16 +1,16 @@
-from asyncio import TimeoutError as AsyncTimeoutError, sleep, wait
+from asyncio import TimeoutError as AsyncTimeoutError
+from asyncio import sleep, wait
 from datetime import datetime as dt
 from html import unescape
 from io import BytesIO
 from random import choice, randint, shuffle
 from time import perf_counter
-import concurrent.futures
 
 from akinator import CantGoBackAnyFurther
 from akinator.async_aki import Akinator
 from discord import Colour, Embed, File
 from discord.ext import commands
-from cogs.assets.custom import CustomCog
+from cogs.assets.custom import CustomCog, cooldown
 
 GLITCH_ALL = "".join((chr(i) for i in range(0x300, 0x370))) + "".join((chr(i) for i in range(0x483, 0x48a)))
 DEFAULT_SIMONSAYS_EMOJIS = list("🔴💛🍏")
@@ -30,7 +30,7 @@ class Fun(CustomCog):
         self.busdriverthanks = 0
 
     @commands.group(name="akinator", aliases=["aki"])
-    @commands.cooldown(2, 60, commands.BucketType.user)
+    @cooldown(2, 60, 4, 30, commands.BucketType.user)
     @commands.bot_has_permissions(add_reactions=True)
     async def akinator_cmd(self, ctx):
         """A classic game of Akinator!"""
@@ -146,7 +146,7 @@ class Fun(CustomCog):
         ctx.error_handled = True
 
     @commands.command()
-    @commands.cooldown(1, 6, commands.BucketType.user)
+    @cooldown(2, 10, 3, 3, commands.BucketType.user)
     @commands.bot_has_permissions(add_reactions=True)
     async def trivia(self, ctx: commands.Context, difficulty="random"):
         """Gives you some random trivia.\n
@@ -212,7 +212,7 @@ class Fun(CustomCog):
     
     @commands.command(name="10s")
     @commands.bot_has_permissions(add_reactions=True)
-    @commands.cooldown(5, 60, commands.BucketType.user)
+    @cooldown(6, 60, 0, 0, commands.BucketType.user)
     async def ten_secs(self, ctx):
         """React to the message as close to 10 seconds as you can to win ingots!"""
         emoji = str(choice(ctx.guild.emojis+(self.bot.emoji.minecraft,)))
@@ -245,7 +245,7 @@ class Fun(CustomCog):
         await self.db.add_user_money(ctx.author.id, ingots)
         
     @commands.command()
-    @commands.cooldown(3, 60)
+    @cooldown(3, 60)
     @commands.bot_has_permissions(add_reactions=True)
     async def simonsays(self, ctx):
         """Start a game of Simon Says in the channel

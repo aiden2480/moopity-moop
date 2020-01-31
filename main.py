@@ -115,8 +115,8 @@ async def on_message(m: Message):
 
     # Just in case some idiot managed to lose the prefix
     ctx = await bot.get_context(m)
-    if ctx.invoked_subcommand is None and ctx.guild:
-        if m.content.strip() == ctx.me.mention:
+    if ctx.command is None and ctx.guild:
+        if "".join([i for i in m.content if i not in "<!@>"]) == str(bot.user.id):
             try:
                 await ctx.trigger_typing()
                 prfx = await bot.db.get_guild_prefix(m.guild.id) or bot.default_prefix
@@ -181,11 +181,13 @@ async def on_command_error(ctx: commands.Context, error):
         e.description = "This command cannot be used in a DM",
         await ctx.send(embed=e)
     elif isinstance(error, commands.CommandOnCooldown):
-        cool = ctx.command._buckets._cooldown
+        cool = error.cooldown
         each = f"each {cool.type.name}" if cool.type.name != "default" else "globally"
+        s = "s" if round(cool.rate) != 1 else ""
+
         e.title = "This command is on cooldown!"
-        e.description = f"This command can only be used `{cool.rate}` times per every `{round(cool.per)}s` ({each})\n"
-        e.description += f"Please try again in {naturaltime(dt.now()+td(seconds=error.retry_after))}"
+        e.description = f"This command can only be used `{cool.rate}` time{s} per every `{round(cool.per)}s` ({each})\n"
+        e.description += f"Please try again in "+ naturaltime(dt.now()+td(seconds=error.retry_after))
         await ctx.send(embed=e)
     elif isinstance(error, commands.MissingPermissions):
         perms = [perm.replace("_", " ").replace("guild", "server").title() for perm in error.missing_perms]
@@ -249,6 +251,7 @@ if __name__ == "__main__":
         "fun",
         "developer",
         "hidden",
+        
         # Extra cogs
         "assets.events",
         "assets.periodic",

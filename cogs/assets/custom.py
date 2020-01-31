@@ -24,6 +24,7 @@ class AttrDict(dict):
     def __setattr__(self, attr, value):
         self[attr] = value
 
+DEFAULT_BUCKET = commands.BucketType.member
 
 # Main CustomBot class
 class CustomBot(commands.AutoShardedBot):
@@ -174,7 +175,6 @@ class CustomCog(commands.Cog):
         """Creates an instance of a regular cog, with a few extra things I might want"""
         cog.logger = getLogger(f"bot.cogs.{cog.qualified_name.lower()}")
 
-
 # How about custom ctx, while we're at it
 class CustomContext(commands.Context):
     async def react(self, msg: Optional[Message], *reactions):
@@ -207,6 +207,89 @@ class CustomContext(commands.Context):
             return self.channel.permissions_for(self.guild.me)
         return self.channel.permissions_for(self.bot.user)
 
+# A custom cooldown so I can give different users different cooldowns :)
+class CustomCooldown:
+    def __init__(self, rate, per, prem_rate, prem_per, bucket, **premium):
+        self.premium = premium
+        self.default_mapping = commands.CooldownMapping.from_cooldown(rate, per, bucket)
+        self.premium_mapping = commands.CooldownMapping.from_cooldown(prem_rate, prem_per, bucket)
+
+    def __call__(self, ctx: commands.Context):
+        mapping = self.premium_mapping if self.is_premium(ctx) else self.default_mapping
+        bucket = mapping.get_bucket(ctx.message)
+
+        retry_after = bucket.update_rate_limit()
+        if retry_after:
+            error = commands.CommandOnCooldown(bucket, retry_after)
+            error.premium = mapping is self.premium_mapping
+            error.premium_mapping = self.premium_mapping
+            raise error
+        return True
+
+    def is_premium(self, ctx: commands.Context):
+        userid = ctx.author.id
+        
+        if self.premium["owner"]:
+            if userid == ctx.bot.owner_id:
+                return True
+        
+        if self.premium["admin"]:
+            if ctx.author.permissions_in(ctx.channel).administrator:
+                return True
+        
+        if self.premium["guild"]:
+            if userid in [m.id for m in ctx.bot.get_guild(496081601755611137).members]:
+                return True
+        
+        return False
+
+def cooldown(*args, **kwargs):
+    """
+    Implements a custom cooldown which means I can apply different cooldowns for different users
+
+    **ARGS**
+    The args are the arguments required to set the ratelimits
+
+    - If two arguments are supplied, they must be `rate` and `per`, meaning no seperate cooldown for premium and the default BucketType
+    - If three arguments are supplied, they must be `rate`, `per`, and a `bucket`. No seperate cooldown for premium
+    - If four arguments are supplied, they must be `rate`, `per`, `premium_rate` and `premium_per`. This allows for a custom cooldown to be set for premium users
+    - If five arguments are supplied, they must be `rate`, `per`, `premium_rate`, `premium_per` and `bucket`. Allowing both a different ratelimit for premium and also a different bucket to be set
+    
+    **KWARGS**
+    The keyword arguments are the settings for what does and doesn't count as premium for this command
+    Below listed are the different options and their default settings
+
+    - `guild=True` If being in the support guild should make a user "premium"
+    - `admin=False` If the user should use premium cooldown if they have `administrator` perms
+    - `owner=True` If the bot owner should be exempt from cooldowns 
+
+    > More copy pasta from Danny's repo. This overwrites the default decorator in order to implement custom cooldown.
+    https://github.com/Rapptz/discord.py/blob/master/discord/ext/commands/core.py#L1740
+    """
+    assert len(args) >= 2 and len(args) <= 5, f"Invalid amount of args provided ({len(args)})"
+    premium = dict()
+    premium["guild"] = kwargs.pop("guild", True)
+    premium["admin"] = kwargs.pop("admin", False)
+    premium["owner"] = kwargs.pop("owner", True)
+
+    if kwargs:
+        raise TypeError(f"Invalid premium argument {list(kwargs.keys())[0]!r}")
+
+    if len(args) == 5: # Decorator supplied rate, per, prate, pper and bucket
+        rate, per, prate, pper, bucket = args
+    if len(args) == 4:
+        rate, per, prate, pper = args
+        bucket = DEFAULT_BUCKET
+    elif len(args) == 3: # Decorator supplied rate, per and bucket
+        rate, per, bucket = args
+        prate, pper = rate, per
+    elif len(args) == 2: # Decorator supplied rate and per
+        rate, per = args
+        prate, pper = rate, per
+        bucket = DEFAULT_BUCKET
+    
+    cool = CustomCooldown(rate, per, prate, pper, bucket, **premium)
+    return commands.check(cool)
 
 # Converters
 class MinecraftUser(commands.Converter):

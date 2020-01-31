@@ -3,7 +3,7 @@ from typing import Optional
 
 from discord import Colour, Embed, Member, User
 from discord.ext import commands
-from cogs.assets.custom import CustomCog
+from cogs.assets.custom import CustomCog, cooldown
 
 
 class Currency(CustomCog):
@@ -16,7 +16,6 @@ class Currency(CustomCog):
         self.db = bot.db
 
     @commands.command(aliases=["bal"])
-    @commands.cooldown(3, 10, commands.BucketType.member)
     async def balance(self, ctx, member: Member="self"):
         """Find a user's balance"""
         member = ctx.author if member == "self" else member
@@ -50,7 +49,7 @@ class Currency(CustomCog):
         await ctx.send(embed=embed)
 
     @commands.command(aliases=["freemoney"])
-    @commands.cooldown(1, 60*60*24, commands.BucketType.user)
+    @cooldown(1, 60*60*24, commands.BucketType.user)
     async def daily(self, ctx):
         """Redeem your daily ingots
         Gives you a random amount of money between 300 and 375 ingots"""
@@ -74,7 +73,7 @@ class Currency(CustomCog):
 
     @commands.command()
     @commands.guild_only()
-    @commands.cooldown(2, 400, commands.BucketType.member)
+    @cooldown(2, 400, 3, 400, commands.BucketType.member)
     async def steal(self, ctx, victim: Member):
         # FIXME: Change all the ratios for stealing and stoof
         """Attempts to steal from an unsuspecting victim\n

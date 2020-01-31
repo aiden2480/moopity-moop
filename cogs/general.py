@@ -6,7 +6,7 @@ from discord import __version__ as dpy_version
 from discord.ext import commands
 from humanize import naturaltime
 from cogs.assets.paginator import HelpPaginator
-from cogs.assets.custom import CustomCog
+from cogs.assets.custom import CustomCog, cooldown
 
 
 class General(CustomCog):
@@ -22,7 +22,7 @@ class General(CustomCog):
         self.bot.help_command = self._original_help_command
 
     @commands.command(name= "help")
-    @commands.cooldown(1, 3.0)
+    @cooldown(1, 3, 3, 3)
     @commands.bot_has_permissions(embed_links=True, read_message_history=True, add_reactions=True)
     async def _help(self, ctx, *, command: str = None):
         """Stop it, get some help"""
@@ -52,7 +52,7 @@ class General(CustomCog):
 
     @commands.command(aliases=["about", "botinfo", "stats"])
     @commands.bot_has_permissions(embed_links=True)
-    @commands.cooldown(3, 8, commands.BucketType.user)
+    @cooldown(3, 8, 3, 3, commands.BucketType.user)
     async def info(self, ctx):
         """Info and stats about the bot"""
         await ctx.trigger_typing()

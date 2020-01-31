@@ -5,7 +5,7 @@ from time import ctime, time
 from discord import Colour, Embed
 from discord.ext import commands
 from humanize import naturaltime
-from cogs.assets.custom import CustomCog, MinecraftUser
+from cogs.assets.custom import CustomCog, MinecraftUser, cooldown
 
 
 class Minecraft(CustomCog):
@@ -17,7 +17,7 @@ class Minecraft(CustomCog):
         self.sess = bot.session
 
     @commands.command(aliases=["lookup", "pingserver"])
-    @commands.cooldown(2, 12, commands.BucketType.user)
+    @cooldown(2, 12, 3, 8, commands.BucketType.user)
     async def server(self, ctx, server:str):
         """Find a server to get its status and other information\n
         Other information includes:
@@ -59,7 +59,7 @@ class Minecraft(CustomCog):
         await ctx.send(embed=e)
 
     @commands.command(aliases=["user", "profile"])
-    @commands.cooldown(2, 12, commands.BucketType.user)
+    @cooldown(2, 12, 3, 8, commands.BucketType.user)
     async def mcuser(self, ctx, name_or_UUID):
         """Find a minecraft user by username or UUID"""
         start = time()
@@ -101,7 +101,7 @@ class Minecraft(CustomCog):
         await ctx.send(embed=e)
 
     @commands.command(name="status", aliases=["mcserverstatus"])
-    @commands.cooldown(2, 12, commands.BucketType.user)
+    @cooldown(2, 12, 3, 8, commands.BucketType.user)
     async def status_command(self, ctx):
         """Finds the status of the minecraft servers"""
         start = time()
@@ -121,7 +121,7 @@ class Minecraft(CustomCog):
         await ctx.send(embed=e)
 
     @commands.command(aliases=["hyuser", "hypixeluser"])
-    @commands.cooldown(2, 12, commands.BucketType.user)
+    @cooldown(2, 12, 3, 6, commands.BucketType.user)
     async def hypixel(self, ctx, user):
         """Find the Hypixel stats of a user\n
         You can find:
@@ -205,7 +205,7 @@ class Minecraft(CustomCog):
         await ctx.send(embed=e)
 
     @commands.command(aliases=["thehive", "hiveuser"])
-    @commands.cooldown(2, 12, commands.BucketType.user)
+    @cooldown(2, 12, 3, 6, commands.BucketType.user)
     async def hive(self, ctx, user):
         """Fetch stats about a Hive user"""
         start = time()
@@ -254,7 +254,7 @@ class Minecraft(CustomCog):
         await ctx.send(embed=e)
 
     @commands.command(aliases=["thehivestats"])
-    @commands.cooldown(2, 5, commands.BucketType.user)
+    @cooldown(2, 8, 2, 6, commands.BucketType.user)
     async def hivestats(self, ctx):
         """Fetch stats about the hive server"""
         start = time()
@@ -271,7 +271,7 @@ class Minecraft(CustomCog):
         e.set_footer(text=f"Information gathered in {round((time()- start)*1000)}ms", icon_url=self.bot.user.avatar_url)
         return await ctx.send(embed=e)
 
-    @commands.cooldown(8, 45, commands.BucketType.user)
+    @cooldown(8, 45, 8, 20, commands.BucketType.user)
     @commands.command(aliases=["usernamecheck"])
     async def namecheck(self, ctx, name: MinecraftUser):
         """Check if a Minecraft username is taken, or if you can claim it"""
@@ -296,6 +296,7 @@ class Minecraft(CustomCog):
         await ctx.send(embed=embed)
     
     @commands.command()
+    @cooldown(5, 20)
     async def sales(self, ctx):
         """Shows the sales statistics for Minecraft"""
         await ctx.trigger_typing()

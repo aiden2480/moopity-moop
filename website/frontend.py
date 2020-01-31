@@ -261,7 +261,8 @@ async def web_get_cmd_data(app: web.Application):
     cmds = sorted(app["bot"].commands, key=lambda cmd: cmd.cog_name)
     cmds = sorted(cmds, key=lambda i:app["bot"].cog_load_order.index(i.cog))
     cmds = [cmd for cmd in cmds if cmd.enabled and not cmd.hidden and cmd.name != "jishaku"]
-    cmds = [cmd for cmd in cmds if "is_owner" not in [chk.__qualname__.split(".")[0] for chk in cmd.checks]]
+    cmds = [cmd for cmd in cmds if "is_owner" not in [getattr(chk, "__qualname__", "nope").split(".")[0] for chk in cmd.checks]]
+    # TODO: Too hacky, I don't like it >_<
 
     data = {cog.qualified_name: list() for cog in app["bot"].cog_load_order}
     [data[cmd.cog.qualified_name].append(cmd) for cmd in cmds]

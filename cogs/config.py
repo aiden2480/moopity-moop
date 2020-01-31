@@ -2,7 +2,7 @@ from typing import Union
 
 from discord import Colour, Embed, Role
 from discord.ext import commands
-from cogs.assets.custom import CustomCog
+from cogs.assets.custom import CustomCog, cooldown
 
 
 class Config(CustomCog):
@@ -14,7 +14,7 @@ class Config(CustomCog):
         self.db = bot.db
 
     @commands.command(name="config", aliases=["serverconfig", "serverconf"])
-    @commands.cooldown(3, 5, commands.BucketType.user)
+    @cooldown(3, 60, 4, 45, commands.BucketType.guild)
     @commands.guild_only()
     async def config_command(self, ctx):
         # TODO: You only need admin permissions to change the prefix lmao not view it
@@ -40,7 +40,7 @@ class Config(CustomCog):
         await ctx.send(embed=e)
 
     @commands.command(name="prefix", aliases=["serverprefix", "botprefix"])
-    @commands.cooldown(3, 5, commands.BucketType.user)
+    @cooldown(3, 60, 4, 45, commands.BucketType.guild)
     @commands.has_permissions(manage_guild=True)
     @commands.guild_only()
     async def prefix_command(self, ctx, prefix=None):
@@ -71,7 +71,7 @@ class Config(CustomCog):
         await self.db.set_guild_prefix(ctx.guild.id, prefix)
 
     @commands.command(name="setserver", aliases=["mcserver", "mcserverip"])
-    @commands.cooldown(3, 5, commands.BucketType.user)
+    @cooldown(3, 60, 4, 45, commands.BucketType.guild)
     @commands.has_permissions(manage_guild=True)
     @commands.guild_only()
     async def mcserver_command(self, ctx, ip=None):
@@ -102,7 +102,7 @@ class Config(CustomCog):
         await self.db.set_minecraft_server(ctx.guild.id, ip)
 
     @commands.command(name="autorole", aliases=["minecraftrole", "mcrole", "role"])
-    @commands.cooldown(3, 5, commands.BucketType.user)
+    @cooldown(3, 60, 4, 45, commands.BucketType.guild)
     @commands.has_permissions(manage_guild=True)
     @commands.guild_only()
     async def autorole_command(self, ctx, role: Union[Role, str] = None):
