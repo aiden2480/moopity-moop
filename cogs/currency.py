@@ -189,7 +189,7 @@ class Currency(CustomCog):
         await ctx.send(f"Ok ima give you `{amount if won else -amount}` now")
         # await self.db.add_user_money(amount if won else -amount)
 
-    @commands.command(enabled=False)
+    @commands.command()
     @cooldown(1, 60*60, 1, 60*50, commands.BucketType.user)
     async def work(self, ctx):
         if ctx.author.id not in self.work_streak.keys(): # User has no streak recorded
