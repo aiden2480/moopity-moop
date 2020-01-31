@@ -73,58 +73,48 @@ class Currency(CustomCog):
 
     @commands.command()
     @commands.guild_only()
-    @cooldown(2, 400, 3, 400, commands.BucketType.member)
+    @cooldown(1, 480, 1, 390, commands.BucketType.member)
     async def steal(self, ctx, victim: Member):
-        # FIXME: Change all the ratios for stealing and stoof
         """Attempts to steal from an unsuspecting victim\n
-        Both you and the user you are attemping to
-        steal from must have at least 75 ingots or this
-        will fail
+        You must have at least 150 ingots to try and steal,
+        and your victim must have at least 100.
 
-        There is a 35% chance that you will fail
+        There is a 40% chance that you will fail
         and, as compensation, give the user you
         attempted to steal from some ingots instead
-
-        The only bot that you can steal from is this one.
-        However, there is a 60% chance that you will fail,
-        but also a 125% reward if you are successful"""
+        """
+        # TODO: Fiddle with the win/lose ratio
         you = await self.db.get_user_money(ctx.author.id, human_readable=False)
         vtm = await self.db.get_user_money(victim.id, human_readable=False)
-        win = randint(0, 100) > 35
-        amount = randint(round(vtm/8), round(vtm/3))
+        won = randint(0, 100) > 40
 
+        # Checks
         if victim == ctx.author:
             return await ctx.send("Congratulations, you played yourself")
-        if victim.bot and victim != ctx.guild.me:
-            return await ctx.send(f"Uh oh, you can't steal from bots! 🤖 ~~except me~~")
-        if you < 75:
-            return await ctx.send(f"You must have at least **75 {self.bot.ingot}** to steal from someone. You still need another **{75-you} {self.bot.ingot}** 🤷")
-        if vtm < 75 and victim != ctx.guild.me:
+        if victim.bot:
+            return await ctx.send(f"Uh oh, you can't steal from bots! 🤖")
+        if you < 150:
+            return await ctx.send(f"You must have at least **150 {self.bot.ingot}** to steal from someone. You still need another **{150-you} {self.bot.ingot}** 🤷")
+        if vtm < 100:
             return await ctx.send(f"Not worth it, **{victim}** only has **{vtm} {self.bot.ingot}**")
-        if victim == ctx.guild.me:
-            win = randint(0, 100) > 60
-            amount = randint(0, 500)
 
-
-        if win:
-            while amount > vtm:
-                amount = randint(20, amount)
-
+        if won:
+            amount = randint(round(vtm/8), round(vtm/3))
             await ctx.send(f"Wow congrats **{ctx.author}**! You managed to steal **{amount} {self.bot.ingot}** from **{victim}**")
-            try: await victim.send(f"Massive 🇫 {ctx.author.mention} just stole **{amount} {self.bot.ingot}** from you in `{ctx.guild}` 😕")
+            
+            try: await victim.send(f"Massive 🇫 **{ctx.author}** just stole **{amount} {self.bot.ingot}** from you in `{ctx.guild}` 😕")
             except: pass
-        else:
-            while amount > you:
-                amount = randint(20, amount)
 
-            msg=await ctx.send(f"Massive 🇫 for **{ctx.author}** who tried (and failed) steal from **{victim}** and had to pay them **{amount} {self.bot.ingot}**")
-            await ctx.react(msg, "🇫")
-            amount=-amount
-
-        # Transfer the money
-        await self.db.add_user_money(ctx.author.id, amount)
-        if not victim.bot:
+            await self.db.add_user_money(ctx.author.id, amount)
             await self.db.add_user_money(victim.id, -amount)
+            return
+
+        amount = randint(round(you/8), round(you/3))
+        msg = await ctx.send(f"Massive 🇫 for **{ctx.author}** who tried (and failed) steal from **{victim}** and had to pay them **{amount} {self.bot.ingot}**")
+        await ctx.react(msg, "🇫")
+
+        await self.db.add_user_money(ctx.author.id, -amount)
+        await self.db.add_user_money(victim.id, amount)
 
     @commands.command()
     async def flip(self, ctx, headsortails: str = ""):
