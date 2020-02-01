@@ -52,7 +52,7 @@ class Currency(CustomCog):
             emoji = self.db.LEADERBOARD_EMOJI_KEY.get(
                 len(embed.description.split("\n")),
             self.db.LEADERBOARD_DEFAULT_EMOJI)
-            embed.description += f"\n{emoji} **{money:,} {self.bot.ingot}** - {self.bot.get_user(id_)}"
+            embed.description += f"\n{emoji} **{self.bot.get_user(id_)}** has **{money:,} {self.bot.ingot}**"
         
         url = f"{self.bot.website_url}/leaderboard?guild={ctx.guild.id}"
         embed.description += f"\n\nSee the online leaderboard [here]({url} \"{ctx.guild}'s leaderboard\")"

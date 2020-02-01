@@ -58,7 +58,6 @@ class General(CustomCog):
         await ctx.trigger_typing()
         e = Embed(colour=Colour.blue(), description=self.bot.description)
         global_commands = []
-        infoo = ""
 
         for cog in [c[1] for c in self.bot.cogs.items()]:
             for cmd in cog.get_commands():
@@ -67,6 +66,12 @@ class General(CustomCog):
 
         async with self.sess.get("https://api.github.com/repos/aiden2480/moopity-moop/commits") as resp:
             lastcommits = (await resp.json())[:3]
+
+        g = self.bot.get_guild(496081601755611137)
+        c = g.get_channel(554544702624366603)
+        history = await c.history(limit=20).flatten()
+        msg = sorted(history, key=lambda m: m.content.startswith("🚀"), reverse=True)[0]
+        infoo = f"{msg.content[3:].strip()}\n" if msg.content.startswith("🚀") else ""
 
         for commit in lastcommits:
             msg = commit["commit"]["message"].split("\n")[0]
@@ -84,7 +89,7 @@ class General(CustomCog):
             "Ping 🏓": f"{round(self.bot.latency * 1000, 2)}ms",
         }
 
-        e.add_field(name="Last updates", value=infoo, inline=False)
+        e.add_field(name="Last updates 📰", value=infoo, inline=False)
         for field in fields:
             e.add_field(name=field, value=fields[field])
         e.add_field(name="Uptime 🤖", value=self.bot.uptime, inline=False)
