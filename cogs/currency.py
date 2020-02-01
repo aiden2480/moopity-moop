@@ -221,16 +221,17 @@ class Currency(CustomCog):
             return self.work_streak.pop(ctx.author.id)
 
         self.work_streak[ctx.author.id].append(dt.now())
+        moolah = 90+10*len(self.work_streak[ctx.author.id])
         embed = Embed(colour=Colour.blue())
         embed.description = """
             Correct well done! {}
             You earned `{}` ingots from a `{}` day streak
         """.format(
-            self.bot.ingot,
-            90+10*len(self.work_streak[ctx.author.id]),
+            self.bot.ingot, moolah,
             len(self.work_streak[ctx.author.id])
         )        
         await ctx.send(embed=embed)
+        await self.db.add_user_money(ctx.author.id, moolah)
 
 
 class AdminCurrency(CustomCog):
