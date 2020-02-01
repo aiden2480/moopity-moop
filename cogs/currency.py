@@ -128,6 +128,7 @@ class Currency(CustomCog):
         await self.db.add_user_money(victim.id, amount)
 
     @commands.command()
+    @cooldown(8, 90, 20, 90)
     async def flip(self, ctx, headsortails: str = ""):
         """Flip a coin, who knows, you might get some ingots"""
         call = headsortails.lower()
