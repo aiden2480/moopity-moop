@@ -145,7 +145,7 @@ class Database(object):
         return await self.save(f"guilds/{guildid}/minecraft", serverip)
 
     async def get_minecraft_server(self, guildid: int):
-        return await self.get(f"guilds/{guildid}/minecraft")
+        return await self.get(f"guilds/{guildid}/minecraft", 0)
 
     # Guild minecraft role
     async def set_minecraft_role(self, guildid: int, roleid: int):
@@ -168,6 +168,20 @@ class Database(object):
     async def add_user_money(self, userid: int, amount: int):
         usermoney = await self.get_user_money(userid, human_readable=False)
         return await self.set_user_money(userid, usermoney + amount)
+    
+    async def set_bank_money(self, userid: int, amount: int):
+        amount = amount if amount >= 0 else 0
+        return await self.save(f"users/{userid}/bank", amount)
+
+    async def get_bank_money(self, userid: int, *, human_readable=True):
+        """`human_readable` specefies if the bot should add in commas every
+        three characters, which creates an `str` object instead of an `int`"""
+        d = await self.get(f"users/{userid}/bank", default=0)
+        return f"{d:,}" if human_readable else d
+
+    async def add_bank_money(self, userid: int, amount: int):
+        usermoney = await self.get_bank_money(userid, human_readable=False)
+        return await self.set_bank_money(userid, usermoney+amount)
 
     async def get_leaderboard(self, guild=None, maxusers=10):
         """

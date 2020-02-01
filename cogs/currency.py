@@ -240,6 +240,62 @@ class Currency(CustomCog):
         await ctx.send(embed=embed)
         await self.db.add_user_money(ctx.author.id, moolah)
 
+    @commands.group(aliases=["vault"])
+    async def bank(self, ctx):
+        """Keep ingots safe from thievery in your bank.
+        
+        The maximum amount of ingots your bank can hold
+        is fluid - always half of your wallet at the time
+        of deposit. Your if your wallet balance drops below
+        this limit while your ingots are in the bank, they are
+        still safe, however you can't add more until your
+        wallet balance tops up again.
+
+        If you are in the support server you can hold more in
+        your bank account: an extra 5%.
+        
+        Unlike your wallet, you can't get the balance of another
+        users bank, unless they show it to you"""
+        if ctx.invoked_subcommand is not None:
+            return
+
+        embed = Embed(colour=Colour.blue())
+        bank = await self.db.get_bank_money(ctx.author.id, human_readable=False)
+        wallet = await self.db.get_user_money(ctx.author.id, human_readable=False)
+        premium = self.bot.is_user_premium(ctx.author.id)
+
+        embed.description = f"Balance: **{bank}/{round(wallet/2)} {self.bot.ingot}**"
+        if bank > round(wallet/2):
+            embed.set_footer(text="Bank full! No more ingots can be deposited")
+        embed.set_author(name=f"{ctx.author}'s bank account", icon_url="https://cdn.discordapp.com/emojis/652064889602441216.png")
+        await ctx.send(embed=embed)
+    
+    @bank.command(aliases=["dep"])
+    async def deposit(self, ctx, amount: int):
+        """Deposit ingots into your bank"""
+        bal = await self.db.get_user_money(ctx.author.id, human_readable=False)
+        bank = await self.db.get_bank_money(ctx.author.id, human_readable=False)
+        premium = self.bot.is_user_premium(ctx.author.id)
+        capacity = 55 if premium else 50
+        amount = int(min([amount, (capacity*bal)/100]))
+
+        if bank > (capacity*bal)/100:
+            return await ctx.send("Your bank is full!")
+        
+        await ctx.send(f"Done! Your wallet balance is now `{bal-amount}` ingots and your bank holds `{bank+amount}`")
+        await self.db.add_bank_money(ctx.author.id, amount)
+        await self.db.add_user_money(ctx.author.id, -amount)
+
+    @bank.command(aliases=["with"])
+    async def withdraw(self, ctx, amount: int):
+        """Withdraw ingots from your bank"""
+        bank = await self.db.get_bank_money(ctx.author.id, human_readable=False)
+        amount = min([amount, bank])
+
+        await ctx.send(f"Withdrew `{amount}` ingots 👍")
+        await self.db.add_user_money(ctx.author.id, amount)
+        await self.db.add_bank_money(ctx.author.id, -amount)
+
 
 class AdminCurrency(CustomCog):
     def __init__(self, bot: commands.Bot):

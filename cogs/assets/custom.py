@@ -116,6 +116,17 @@ class CustomBot(commands.AutoShardedBot):
     
     async def get_context(self, message: Message, *, cls=None):
         return await super().get_context(message, cls=cls or CustomContext)
+    
+    def is_user_premium(self, userid: int, **kwargs):
+        if kwargs.get("owner", True):
+            if userid == self.owner_id:
+                return True
+        
+        if kwargs.get("guild", True):
+            if userid in [m.id for m in self.get_guild(496081601755611137).members]:
+                return True
+        
+        return False
 
     # Other functions
     @property
