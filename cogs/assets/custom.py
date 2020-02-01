@@ -45,9 +45,6 @@ class CustomBot(commands.AutoShardedBot):
         self.delete_data_on_remove = True if self.env.get("DELETE_DATA_ON_REMOVE", "False").upper() == "TRUE" else False
         self.website_url = "https://www.moopitymoop.tk" if not self.development else "http://localhost:8080"
         self.oauth_callback = f"{self.website_url}/login"
-        
-        try: self.VERSION = check_output("git describe --tags --always", shell=True).decode().strip()
-        except CalledProcessError: self.VERSION = "Latest"
 
         # Set up logging
         self.logger = getLogger("bot")
@@ -138,6 +135,11 @@ class CustomBot(commands.AutoShardedBot):
     @property
     def owner(self) -> User:
         return self.get_user(self.owner_id)
+    
+    @property
+    def version(self) -> str:
+        try: return check_output("git describe --tags --always", shell=True).decode().strip()
+        except CalledProcessError: return "latest"
     
     def time_between(self, dateone: dt, datetwo: dt) -> str:
         """Find the time between `dateone` and `datetwo` and

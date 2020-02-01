@@ -82,7 +82,7 @@ class General(CustomCog):
 
         fields = {
             "Developer 💻": f"{self.bot.owner}\n{self.bot.owner.id}",
-            "Version 🛠": f"Bot version `{self.bot.VERSION}`\nDiscord.py `v{dpy_version}`",
+            "Version 🛠": f"Bot version `{self.bot.version}`\nDiscord.py `v{dpy_version}`",
             "Commands 🍰": len(global_commands),
             "Guild count 🛡": len(self.bot.guilds),
             "User count 👥": len(self.bot.users),
