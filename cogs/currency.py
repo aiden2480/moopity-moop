@@ -15,6 +15,7 @@ WORK_PHRASES = [
     "I can't believe it worked first time!",
     "It's not a bug it's a feature",
 ]
+WEIRD_IOS = {"’": "'", "‘": "'", "“": '"', "”": '"'}
 
 class Currency(CustomCog):
     """What's better than a currency system where all you can do is
@@ -25,6 +26,7 @@ class Currency(CustomCog):
         self.bot = bot
         self.db = bot.db
         self.work_streak = dict() # {id: [hours_worked]}
+        self.bank_cooldown = dict() # {id: last_accessed}
 
     @commands.command(aliases=["bal"])
     async def balance(self, ctx, member: Member="self"):
@@ -214,11 +216,15 @@ class Currency(CustomCog):
             await prompt.edit(content="Timed out \N{CONFUSED FACE}")
             return self.work_streak.pop(ctx.author.id)
 
-        if msg.content.replace("\u200b", "") == phrase and "\u200b" in msg.content:
+        content = msg.content
+        for ios, normal in WEIRD_IOS.items():
+            content = msg.content.replace(ios, normal)
+
+        if content.replace("\u200b", "") == phrase and "\u200b" in content:
             await ctx.send("No cheating You lose!")
             return self.work_streak.pop(ctx.author.id)
-        if msg.content.lower() != phrase.lower():
-            await ctx.send(f"Wrong! 😕\n```diff\n+ {phrase}\n- {msg.content}```")
+        if content.lower() != phrase.lower():
+            await ctx.send(f"Wrong! 😕\n```diff\n+ {phrase}\n- {content}```")
             return self.work_streak.pop(ctx.author.id)
 
         self.work_streak[ctx.author.id].append(dt.now())
