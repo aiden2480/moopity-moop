@@ -276,6 +276,7 @@ class Currency(CustomCog):
     @bank.command(aliases=["dep"])
     async def deposit(self, ctx, amount: int):
         """Deposit ingots into your bank"""
+        amount = abs(amount)
         bal = await self.db.get_user_money(ctx.author.id, human_readable=False)
         bank = await self.db.get_bank_money(ctx.author.id, human_readable=False)
         premium = self.bot.is_user_premium(ctx.author.id)
@@ -292,6 +293,7 @@ class Currency(CustomCog):
     @bank.command(aliases=["with"])
     async def withdraw(self, ctx, amount: int):
         """Withdraw ingots from your bank"""
+        amount = abs(amount)
         bank = await self.db.get_bank_money(ctx.author.id, human_readable=False)
         amount = min([amount, bank])
 
