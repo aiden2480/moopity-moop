@@ -73,6 +73,9 @@ class Currency(CustomCog):
     @commands.command(aliases=["pay"])
     async def give(self, ctx, member:Member, amount: int):
         """I don't know why you would want to give away your hard earned ingots but sure"""
+        author = await self.db.get_user_money(ctx.author.id, human_readable=False)
+        amount = min([amount, author])
+        
         if amount < 0:
             return await ctx.send("That's illegal!")
         if member == ctx.author:
